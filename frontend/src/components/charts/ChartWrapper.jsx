@@ -1,5 +1,4 @@
 import React from 'react';
-import { ResponsiveContainer } from 'recharts';
 
 export const ChartWrapper = ({
   title,
@@ -28,9 +27,7 @@ export const ChartWrapper = ({
       </div>
 
       <div style={{ width: '100%', height }}>
-        <ResponsiveContainer width="100%" height="100%">
-          {children}
-        </ResponsiveContainer>
+        {children}
       </div>
     </div>
   );

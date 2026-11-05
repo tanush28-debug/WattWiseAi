@@ -29,11 +29,45 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-export const uploadBillMiddleware = multer({
+const multerUpload = multer({
   storage,
   limits: {
     fileSize: MAX_FILE_SIZE,
   },
   fileFilter,
-}).single('file');
+}).single('bill');
 
+/**
+ * Wrapper that handles multer errors explicitly and passes them to Express error handler.
+ * Uses field name 'bill' (matches frontend FormData key).
+ */
+export const uploadBillMiddleware = (req, res, next) => {
+  multerUpload(req, res, (err) => {
+    if (err instanceof multer.MulterError) {
+      // Multer-specific errors (e.g. file too large)
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(413).json({
+          success: false,
+          message: 'File too large. Maximum upload size is 15 MB.',
+        });
+      }
+      if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+        return res.status(400).json({
+          success: false,
+          message: `Unexpected file field. Please use the correct upload form. Received field: "${err.field}"`,
+        });
+      }
+      return res.status(400).json({
+        success: false,
+        message: err.message || 'File upload error.',
+      });
+    } else if (err) {
+      // Custom fileFilter errors or other errors
+      return res.status(400).json({
+        success: false,
+        message: err.message || 'Invalid file. Only PDF, PNG, and JPG files are permitted.',
+      });
+    }
+    next();
+  });
+};

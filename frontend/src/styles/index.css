@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: #F4F0E6;
+    color: #151713;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  }
+
+  ::selection {
+    background-color: #2457F5;
+    color: #FFFFFF;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #EAE4D5;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #C7BBA2;
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #A0937A;
+  }
+}
+
+@layer components {
+  /* Electric Cobalt Glow effects */
+  .glow-cobalt {
+    box-shadow: 0 0 25px -4px rgba(36, 87, 245, 0.45);
+  }
+  .glow-cobalt-subtle {
+    box-shadow: 0 0 15px -3px rgba(36, 87, 245, 0.3);
+  }
+
+  /* Badge pill */
+  .badge-demo {
+    @apply inline-flex items-center px-2 py-0.5 rounded text-[11px] font-mono font-medium tracking-wide bg-amber-500/10 text-amber-800 border border-amber-500/30;
+  }
+  .badge-live {
+    @apply inline-flex items-center px-2 py-0.5 rounded text-[11px] font-mono font-medium tracking-wide bg-cobalt-500/10 text-cobalt-700 border border-cobalt-500/30;
+  }
+}

@@ -12,7 +12,8 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend
+  Legend,
+  ResponsiveContainer
 } from 'recharts';
 import { Leaf, TreePine, Car, Recycle, Info, ArrowDownRight, Sun, Fan, Thermometer, ShieldCheck, Zap, Activity } from 'lucide-react';
 
@@ -112,39 +113,41 @@ export const CarbonFootprint = () => {
             </p>
           </div>
         ) : (
-          <AreaChart data={data?.monthlyEmissions} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-            <defs>
-              <linearGradient id="carbonGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#4D5445" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="#4D5445" stopOpacity={0.0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#EAE4D5" />
-            <XAxis dataKey="month" tickLine={false} axisLine={{ stroke: '#DDD5C1' }} tick={{ fill: '#626A59', fontSize: 11 }} />
-            <YAxis tickLine={false} axisLine={false} tick={{ fill: '#626A59', fontSize: 11 }} />
-            <Tooltip />
-            <Legend verticalAlign="top" align="right" wrapperStyle={{ paddingBottom: '12px', fontSize: '11px' }} />
-            <Area
-              type="monotone"
-              dataKey="emissionsKg"
-              name="Actual Emissions (kg CO₂e)"
-              stroke="#151713"
-              strokeWidth={2}
-              dot={{ r: 4, fill: '#151713', stroke: '#FFFFFF', strokeWidth: 2 }}
-              activeDot={{ r: 6, fill: '#151713', stroke: '#FFFFFF', strokeWidth: 2 }}
-              fill="url(#carbonGradient)"
-            />
-            <Area
-              type="monotone"
-              dataKey="targetKg"
-              name="Climate Target Baseline"
-              stroke="#2457F5"
-              strokeWidth={2}
-              strokeDasharray="4 4"
-              dot={{ r: 3, fill: '#2457F5', stroke: '#FFFFFF', strokeWidth: 1 }}
-              fill="none"
-            />
-          </AreaChart>
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={data?.monthlyEmissions} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <defs>
+                <linearGradient id="carbonGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#4D5445" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#4D5445" stopOpacity={0.0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#EAE4D5" />
+              <XAxis dataKey="month" tickLine={false} axisLine={{ stroke: '#DDD5C1' }} tick={{ fill: '#626A59', fontSize: 11 }} />
+              <YAxis tickLine={false} axisLine={false} tick={{ fill: '#626A59', fontSize: 11 }} tickFormatter={(v) => `${v} kg`} />
+              <Tooltip formatter={(v, name) => [`${v} kg CO₂e`, name]} />
+              <Legend verticalAlign="top" align="right" wrapperStyle={{ paddingBottom: '12px', fontSize: '11px' }} />
+              <Area
+                type="monotone"
+                dataKey="emissionsKg"
+                name="Actual Emissions (kg CO₂e)"
+                stroke="#151713"
+                strokeWidth={2}
+                dot={{ r: 4, fill: '#151713', stroke: '#FFFFFF', strokeWidth: 2 }}
+                activeDot={{ r: 6, fill: '#151713', stroke: '#FFFFFF', strokeWidth: 2 }}
+                fill="url(#carbonGradient)"
+              />
+              <Area
+                type="monotone"
+                dataKey="targetKg"
+                name="Climate Target Baseline"
+                stroke="#2457F5"
+                strokeWidth={2}
+                strokeDasharray="4 4"
+                dot={{ r: 3, fill: '#2457F5', stroke: '#FFFFFF', strokeWidth: 1 }}
+                fill="none"
+              />
+            </AreaChart>
+          </ResponsiveContainer>
         )}
       </ChartWrapper>
 

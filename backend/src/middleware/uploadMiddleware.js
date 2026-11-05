@@ -35,11 +35,11 @@ const multerUpload = multer({
     fileSize: MAX_FILE_SIZE,
   },
   fileFilter,
-}).single('bill');
+}).single('file');
 
 /**
  * Wrapper that handles multer errors explicitly and passes them to Express error handler.
- * Uses field name 'bill' (matches frontend FormData key).
+ * Uses field name 'file' (matches frontend FormData key).
  */
 export const uploadBillMiddleware = (req, res, next) => {
   multerUpload(req, res, (err) => {

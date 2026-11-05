@@ -22,7 +22,7 @@ export const billService = {
    */
   async uploadBill(file, onProgress) {
     const formData = new FormData();
-    formData.append('bill', file);
+    formData.append('file', file);
 
     const response = await apiClient.post('/bills/upload', formData, {
       timeout: 120000, // 2-minute timeout for Gemini OCR processing

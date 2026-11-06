@@ -14,25 +14,22 @@ export const Button = ({
   onClick,
   ...props
 }) => {
-  const baseStyles = 'inline-flex items-center justify-center font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed select-none rounded-xl active:scale-[0.98]';
+  const baseStyles =
+    'inline-flex select-none items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50';
 
   const sizeStyles = {
-    sm: 'text-xs px-3 py-1.5 gap-1.5',
-    md: 'text-sm px-4 py-2.5 gap-2',
-    lg: 'text-base px-5 py-3 gap-2.5 font-semibold'
+    sm: 'gap-1.5 px-3 py-1.5 text-xs',
+    md: 'gap-2 px-4 py-2 text-sm',
+    lg: 'gap-2 px-5 py-2.5 text-sm font-semibold'
   };
 
   const variantStyles = {
-    // Primary: Electric Cobalt Blue with White text
-    primary: 'bg-cobalt-500 hover:bg-cobalt-600 text-white shadow-cobalt-sm focus:ring-cobalt-500 font-semibold',
-    // Secondary: Midnight Black with Ivory text
-    secondary: 'bg-midnight-900 hover:bg-midnight-800 text-ivory-100 border border-midnight-700/60 shadow-sm focus:ring-midnight-900',
-    // Outline: Soft borders with hover contrast
-    outline: 'border border-midnight-700/30 text-midnight-900 hover:bg-ivory-200/60 focus:ring-midnight-900',
-    // Ghost: Transparent with subtle hover
-    ghost: 'text-midnight-800 hover:bg-midnight-900/5 focus:ring-midnight-900',
-    // Danger: Crimson Red for destructive actions
-    danger: 'bg-rose-600 hover:bg-rose-500 text-white shadow-sm focus:ring-rose-500'
+    primary: 'bg-cobalt-600 text-white hover:bg-cobalt-700 focus-visible:ring-cobalt-500',
+    secondary: 'bg-slate-900 text-white hover:bg-slate-800 focus-visible:ring-slate-700',
+    outline:
+      'border border-slate-300 bg-white text-slate-800 hover:bg-slate-50 focus-visible:ring-slate-400',
+    ghost: 'text-slate-700 hover:bg-slate-100 focus-visible:ring-slate-400',
+    danger: 'bg-rose-600 text-white hover:bg-rose-700 focus-visible:ring-rose-500'
   };
 
   return (
@@ -44,12 +41,12 @@ export const Button = ({
       {...props}
     >
       {isLoading ? (
-        <Loader2 className="w-4 h-4 animate-spin shrink-0" />
+        <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
       ) : LeftIcon ? (
-        <LeftIcon className="w-4 h-4 shrink-0" />
+        <LeftIcon className="h-4 w-4 shrink-0" />
       ) : null}
       <span>{children}</span>
-      {!isLoading && RightIcon && <RightIcon className="w-4 h-4 shrink-0" />}
+      {!isLoading && RightIcon && <RightIcon className="h-4 w-4 shrink-0" />}
     </button>
   );
 };

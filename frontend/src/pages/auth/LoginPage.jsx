@@ -22,7 +22,7 @@ export const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isInitializing, setIsInitializing] = useState(false);
 
-  const { login } = useAuth();
+  const { login, authError } = useAuth();
   const toast = useToast();
   const navigate = useNavigate();
   const location = useLocation();
@@ -40,9 +40,11 @@ export const LoginPage = () => {
   }, [activeRole]);
 
   const redirectUserByRole = (userRole) => {
-    const from = location.state?.from?.pathname;
-    if (from) {
-      navigate(from, { replace: true });
+    const from = location.state?.from;
+    const portal = userRole === USER_ROLES.INDUSTRIAL ? '/industrial'
+      : userRole === USER_ROLES.GOVERNMENT ? '/government' : '/consumer';
+    if (from?.pathname === portal || from?.pathname?.startsWith(`${portal}/`)) {
+      navigate(`${from.pathname}${from.search || ''}${from.hash || ''}`, { replace: true });
       return;
     }
     if (userRole === USER_ROLES.INDUSTRIAL) {
@@ -174,6 +176,13 @@ export const LoginPage = () => {
           {currentMeta.subtitle}
         </p>
       </div>
+
+      {authError && (
+        <div role="alert" className="mb-4 flex gap-2 rounded-md border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
+          <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+          <span>{authError}</span>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input

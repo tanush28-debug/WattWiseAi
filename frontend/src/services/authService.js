@@ -5,40 +5,35 @@ import { USER_ROLES } from '../config/constants';
 // Storage key for active user session profile
 const DEMO_USER_KEY = 'wattwise_active_user';
 
+const toAppRole = (role) => {
+  if (role === 'GOVERNMENT_ADMIN') return USER_ROLES.GOVERNMENT;
+  if (role === USER_ROLES.CONSUMER || role === USER_ROLES.INDUSTRIAL) return role;
+  return null;
+};
+
+const resolveVerifiedUser = async (user) => {
+  const response = await apiClient.get('/auth/me');
+  const profile = response?.user;
+  const role = toAppRole(profile?.role);
+  if (!response?.success || profile?.id !== user.id || !role) {
+    throw new Error('Unable to verify your account profile. Please try again.');
+  }
+  return { ...profile, role, isVerified: true };
+};
+
 export const authService = {
   /**
    * Get current authenticated user and verified role
    */
-  async getCurrentUser() {
+  async getCurrentUser(sessionUser) {
     if (isSupabaseConfigured) {
-      try {
-        const { data: { user }, error } = await supabase.auth.getUser();
-        if (error || !user) return null;
-
-        // Fetch verified role from backend API or Supabase user metadata
-        let role = user.user_metadata?.role || USER_ROLES.CONSUMER;
-        try {
-          // Attempt to fetch verified role from Node.js Express backend if available
-          const response = await apiClient.get('/auth/me');
-          if (response?.role) {
-            role = response.role;
-          }
-        } catch (apiErr) {
-          // If backend endpoint is pending, fallback to user_metadata
-          console.debug('Backend /auth/me not reached, using user_metadata:', role);
-        }
-
-        return {
-          id: user.id,
-          email: user.email,
-          fullName: user.user_metadata?.full_name || user.email.split('@')[0],
-          role: role,
-          isVerified: true
-        };
-      } catch (err) {
-        console.error('Error fetching current user:', err);
-        return null;
+      let user = sessionUser;
+      if (!user) {
+        const { data, error } = await supabase.auth.getUser();
+        if (error || !data.user) return null;
+        user = data.user;
       }
+      return resolveVerifiedUser(user);
     } else {
       // In Demo / Offline Mode, retrieve saved demo session or null
       const stored = localStorage.getItem(DEMO_USER_KEY);
@@ -59,19 +54,13 @@ export const authService = {
   async login({ email, password }) {
     if (isSupabaseConfigured) {
       const { data, error } = await supabase.auth.signInWithPassword({
-        email,
+        email: email.trim(),
         password
       });
       if (error) throw error;
-      
-      const role = data.user?.user_metadata?.role || USER_ROLES.CONSUMER;
+
       return {
-        user: {
-          id: data.user.id,
-          email: data.user.email,
-          fullName: data.user.user_metadata?.full_name || email.split('@')[0],
-          role: role
-        },
+        user: await resolveVerifiedUser(data.user),
         session: data.session
       };
     } else {
@@ -100,7 +89,7 @@ export const authService = {
       };
 
       localStorage.setItem(DEMO_USER_KEY, JSON.stringify(demoUser));
-      return { user: demoUser, session: { access_token: 'demo-jwt-token' } };
+      return { user: demoUser, session: null };
     }
   },
 
@@ -116,11 +105,12 @@ export const authService = {
 
     if (isSupabaseConfigured) {
       const { data, error } = await supabase.auth.signUp({
-        email,
+        email: email.trim(),
         password,
         options: {
+          emailRedirectTo: `${window.location.origin}/login?role=${accountType}`,
           data: {
-            full_name: fullName,
+            full_name: fullName.trim(),
             role: accountType
           }
         }
@@ -140,7 +130,7 @@ export const authService = {
       }
 
       return {
-        user: data.user,
+        user: data.session ? await resolveVerifiedUser(data.user) : null,
         session: data.session,
         needsVerification: !data.session
       };
@@ -162,15 +152,13 @@ export const authService = {
    */
   async forgotPassword(email) {
     if (isSupabaseConfigured) {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
         redirectTo: `${window.location.origin}/reset-password`
       });
       if (error) throw error;
       return true;
     } else {
-      // Simulate delay
-      await new Promise(r => setTimeout(r, 600));
-      return true;
+      throw new Error('Password recovery is unavailable in demo mode.');
     }
   },
 
@@ -179,12 +167,16 @@ export const authService = {
    */
   async resetPassword(newPassword) {
     if (isSupabaseConfigured) {
+      const { data, error: sessionError } = await supabase.auth.getUser();
+      if (sessionError || !data.user) {
+        throw new Error('A valid recovery session is required. Request a new password reset link.');
+      }
       const { error } = await supabase.auth.updateUser({ password: newPassword });
       if (error) throw error;
+      await this.logout();
       return true;
     } else {
-      await new Promise(r => setTimeout(r, 600));
-      return true;
+      throw new Error('Password recovery is unavailable in demo mode.');
     }
   },
 
@@ -193,11 +185,8 @@ export const authService = {
    */
   async logout() {
     if (isSupabaseConfigured) {
-      try {
-        await supabase.auth.signOut();
-      } catch (err) {
-        console.warn('Supabase signOut error:', err);
-      }
+      const { error } = await supabase.auth.signOut({ scope: 'local' });
+      if (error) throw error;
     }
     localStorage.removeItem(DEMO_USER_KEY);
   }

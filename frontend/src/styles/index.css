@@ -24,31 +24,22 @@
     height: 6px;
   }
   ::-webkit-scrollbar-track {
-    background: #EAE4D5;
+    background: #E2E8F0;
   }
   ::-webkit-scrollbar-thumb {
-    background: #C7BBA2;
-    border-radius: 9999px;
+    background: #94A3B8;
+    border-radius: 2px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #A0937A;
+    background: #64748B;
   }
 }
 
 @layer components {
-  /* Electric Cobalt Glow effects */
-  .glow-cobalt {
-    box-shadow: 0 0 25px -4px rgba(36, 87, 245, 0.45);
-  }
-  .glow-cobalt-subtle {
-    box-shadow: 0 0 15px -3px rgba(36, 87, 245, 0.3);
-  }
-
-  /* Badge pill */
   .badge-demo {
-    @apply inline-flex items-center px-2 py-0.5 rounded text-[11px] font-mono font-medium tracking-wide bg-amber-500/10 text-amber-800 border border-amber-500/30;
+    @apply inline-flex items-center rounded-sm border border-amber-300 bg-amber-50 px-2 py-0.5 font-mono text-[11px] font-medium tracking-wide text-amber-800;
   }
   .badge-live {
-    @apply inline-flex items-center px-2 py-0.5 rounded text-[11px] font-mono font-medium tracking-wide bg-cobalt-500/10 text-cobalt-700 border border-cobalt-500/30;
+    @apply inline-flex items-center rounded-sm border border-cobalt-300 bg-cobalt-50 px-2 py-0.5 font-mono text-[11px] font-medium tracking-wide text-cobalt-700;
   }
 }

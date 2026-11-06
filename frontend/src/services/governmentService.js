@@ -128,13 +128,7 @@ export const governmentService = {
       const response = await apiClient.post('/government/reports', params);
       return { success: true, data: response.data || response, isDemo: false };
     } catch (err) {
-      await new Promise(r => setTimeout(r, 800));
-      return {
-        success: true,
-        reportId: 'GOV-DOC-' + Math.floor(100000 + Math.random() * 900000),
-        fileName: `National_Energy_Strategy_Synthesis_${params.year || '2026'}.pdf`,
-        isDemo: true
-      };
+      throw new Error(err?.message || 'Failed to compile policy report.');
     }
   }
 };

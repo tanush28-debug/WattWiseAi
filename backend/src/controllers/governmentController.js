@@ -58,7 +58,7 @@ export const governmentController = {
 
   async generateReport(req, res, next) {
     try {
-      const data = await governmentService.generateReport(req.body);
+      const data = await governmentService.generateReport(req.body, req.user, req.supabase);
       res.json({ success: true, data });
     } catch (err) {
       next(err);

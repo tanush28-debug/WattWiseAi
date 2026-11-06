@@ -21,22 +21,19 @@ app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' },
 }));
 
-// CORS Configuration
-const allowedOrigins = [
-  config.frontendOrigin,
-  'http://localhost:3000',
-  'http://localhost:3001',
-  'http://127.0.0.1:3000',
-  'http://127.0.0.1:3001',
-];
-
+// CORS Configuration: exact whitelist from FRONTEND_ORIGIN (comma-separated).
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps, curl, Postman) or matching allowed origins
-    if (!origin || allowedOrigins.includes(origin)) {
+    // Requests without an Origin header are not browser cross-origin requests
+    // (server-to-server, curl, health checks). Browsers always send Origin.
+    if (!origin) return callback(null, true);
+
+    if (config.frontendOrigins.includes(origin)) {
       return callback(null, true);
     }
-    return callback(null, true); // Permissive in development
+
+    // Reject by omitting CORS headers; do not fall through to a permissive default.
+    return callback(null, false);
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],

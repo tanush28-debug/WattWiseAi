@@ -27,7 +27,7 @@ export const ForgotPasswordPage = () => {
     try {
       await forgotPassword(email);
       setIsSubmitted(true);
-      toast.success('Password reset link sent to your email.');
+      toast.success('Recovery request accepted. Check your email if an account exists.');
     } catch (err) {
       setError(err.message || 'Unable to process reset request.');
     } finally {
@@ -44,7 +44,7 @@ export const ForgotPasswordPage = () => {
           </div>
           <h2 className="text-xl font-bold text-midnight-900 mb-2">Check Your Email</h2>
           <p className="text-xs text-midnight-600 mb-6 leading-relaxed">
-            We’ve sent password recovery instructions to <strong className="text-midnight-900">{email}</strong>.
+            If an account exists for <strong className="text-midnight-900">{email}</strong>, you’ll receive password recovery instructions.
           </p>
           <Link to="/login">
             <Button variant="secondary" className="w-full">

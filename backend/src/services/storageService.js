@@ -5,7 +5,10 @@ const BUCKET_NAME = 'electricity-bills';
 export const storageService = {
   /**
    * Upload an electricity bill document to the private Supabase Storage bucket.
-   * Path convention: consumer/{userId}/{timestamp}_{filename}
+   * Path convention (first segment is always the uploader's uid, matching
+   * the storage RLS policy in migration 009):
+   *   {userId}/consumer/{timestamp}_{filename}
+   *   {userId}/industrial/{orgId}/{timestamp}_{filename}
    * @param {Object} params
    * @param {string} params.userId
    * @param {string} params.fileName
@@ -14,13 +17,16 @@ export const storageService = {
    * @param {string} [params.orgId]
    */
   async uploadBillDocument({ userId, fileName, fileBuffer, mimeType, orgId = null, scopedClient = null }) {
+    if (!userId) {
+      throw new Error('Supabase storage upload failed: authenticated user id is required.');
+    }
+
     const timestamp = Date.now();
     const cleanFileName = fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
-    
-    // Determine path based on role / organization
+
     const storagePath = orgId
-      ? `industrial/${orgId}/${timestamp}_${cleanFileName}`
-      : `consumer/${userId}/${timestamp}_${cleanFileName}`;
+      ? `${userId}/industrial/${orgId}/${timestamp}_${cleanFileName}`
+      : `${userId}/consumer/${timestamp}_${cleanFileName}`;
 
     const client = scopedClient || supabase;
     const { data, error } = await client.storage
@@ -31,20 +37,12 @@ export const storageService = {
       });
 
     if (error) {
-      console.warn('Supabase storage upload error:', error.message);
-      // If the bucket doesn't exist yet in Supabase, return a structured path
-      return {
-        storagePath,
-        bucket: BUCKET_NAME,
-        isSimulated: true,
-        error: error.message,
-      };
+      throw new Error(`Supabase storage upload failed: ${error.message}`);
     }
 
     return {
       storagePath: data.path,
       bucket: BUCKET_NAME,
-      isSimulated: false,
     };
   },
 
@@ -68,8 +66,9 @@ export const storageService = {
    * Delete a bill document from private storage
    * @param {string} storagePath 
    */
-  async deleteBillDocument(storagePath) {
-    const { error } = await supabase.storage
+  async deleteBillDocument(storagePath, scopedClient = null) {
+    const client = scopedClient || supabase;
+    const { error } = await client.storage
       .from(BUCKET_NAME)
       .remove([storagePath]);
 

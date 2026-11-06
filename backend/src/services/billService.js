@@ -1,409 +1,523 @@
+import crypto from 'crypto';
 import { storageService } from './storageService.js';
 import { ocrService } from './ocrService.js';
+import { BillExtractionError } from './billParser.js';
 import { calculateCarbonEmissions } from '../utils/calculations.js';
 
-// In-memory fallback bill store for demo/evaluation sessions
-const demoBillsStore = new Map();
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function requirePersistentUser(user, scopedClient) {
+  if (!user || user.isDemo || !scopedClient) {
+    throw new BillExtractionError(
+      'Sign in with a Supabase account to save, verify or delete bills. Demo sessions cannot persist bills.',
+      { statusCode: 403, code: 'AUTH_REQUIRED_FOR_BILLS' }
+    );
+  }
+}
+
+function toIsoDate(value) {
+  if (!value) return null;
+  const text = String(value).trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(text)) return text;
+  const date = new Date(text);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toISOString().slice(0, 10);
+}
+
+function monthBounds(billingMonth, periodStart, periodEnd) {
+  const start = toIsoDate(periodStart);
+  const end = toIsoDate(periodEnd);
+  if (start && end) {
+    return {
+      periodStart: `${start}T00:00:00.000Z`,
+      periodEnd: `${end}T23:59:59.999Z`,
+    };
+  }
+  if (billingMonth) {
+    const parsed = new Date(`${billingMonth} 1`);
+    if (!Number.isNaN(parsed.getTime())) {
+      const first = new Date(Date.UTC(parsed.getUTCFullYear(), parsed.getUTCMonth(), 1));
+      const last = new Date(Date.UTC(parsed.getUTCFullYear(), parsed.getUTCMonth() + 1, 0, 23, 59, 59, 999));
+      return { periodStart: first.toISOString(), periodEnd: last.toISOString() };
+    }
+  }
+  const now = new Date();
+  return {
+    periodStart: new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString(),
+    periodEnd: new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0, 23, 59, 59, 999)).toISOString(),
+  };
+}
+
+function mapBillRow(bill, fallbackName = null) {
+  return {
+    id: bill.id,
+    fileName: bill.file_name,
+    accountNumber: bill.account_number || null,
+    consumerName: bill.consumer_name || fallbackName || null,
+    billingPeriod: bill.billing_period_start && bill.billing_period_end
+      ? `${bill.billing_period_start} – ${bill.billing_period_end}`
+      : bill.billing_month || 'Cycle',
+    billingMonth: bill.billing_month || null,
+    billingPeriodStart: bill.billing_period_start || null,
+    billingPeriodEnd: bill.billing_period_end || null,
+    unitsConsumed: bill.units_consumed_kwh != null ? Number(bill.units_consumed_kwh) : null,
+    amount: bill.total_amount_inr != null ? Number(bill.total_amount_inr) : null,
+    dueDate: bill.due_date || null,
+    tariffCategory: bill.tariff_category || null,
+    status: bill.status,
+    uploadDate: bill.created_at,
+    fileSize: bill.file_size_bytes ? `${Math.round(bill.file_size_bytes / 1024)} KB` : 'N/A',
+    ocrConfidence: bill.ocr_confidence != null ? Number(bill.ocr_confidence) : null,
+    validation: bill.raw_ocr_metadata?.validation || null,
+    warnings: bill.raw_ocr_metadata?.warnings || [],
+    missingFields: bill.raw_ocr_metadata?.missingFields || [],
+    uncertainFields: bill.raw_ocr_metadata?.uncertainFields || [],
+    evidence: bill.raw_ocr_metadata?.evidence || {},
+    sourceEngine: bill.raw_ocr_metadata?.sourceEngine || null,
+    aiModelUsed: bill.raw_ocr_metadata?.aiModelUsed || null,
+    extraction: bill.raw_ocr_metadata || null,
+    breakdown: {
+      energyCharges: bill.energy_charges_inr != null ? Number(bill.energy_charges_inr) : null,
+      standingCharge: bill.fixed_standing_charge_inr != null ? Number(bill.fixed_standing_charge_inr) : null,
+      environmentalSurcharge: bill.fuel_surcharge_fppca_inr != null ? Number(bill.fuel_surcharge_fppca_inr) : null,
+      taxes: bill.electricity_duty_taxes_inr != null ? Number(bill.electricity_duty_taxes_inr) : null,
+    },
+  };
+}
 
 export const billService = {
   /**
    * Get all electricity bills for the authenticated user
    */
   async getBills(user, scopedClient) {
-    if (user && !user.isDemo && scopedClient) {
-      try {
-        const { data, error } = await scopedClient
-          .from('electricity_bills')
-          .select('*')
-          .eq('profile_id', user.id)
-          .order('created_at', { ascending: false });
+    if (!user || user.isDemo || !scopedClient) return [];
 
-        if (error) {
-          console.error('getBills query error:', error.message);
-          return [];
-        }
+    const { data, error } = await scopedClient
+      .from('electricity_bills')
+      .select('*')
+      .eq('profile_id', user.id)
+      .order('created_at', { ascending: false });
 
-        if (data && data.length > 0) {
-          return data.map(b => ({
-            id: b.id,
-            fileName: b.file_name,
-            accountNumber: b.account_number || null,
-            consumerName: b.consumer_name || user?.fullName || null,
-            billingPeriod: b.billing_period_start && b.billing_period_end 
-              ? `${b.billing_period_start} – ${b.billing_period_end}` 
-              : b.billing_month || 'Cycle',
-            billingMonth: b.billing_month || 'N/A',
-            unitsConsumed: Number(b.units_consumed_kwh || 0),
-            amount: Number(b.total_amount_inr || 0),
-            dueDate: b.due_date || null,
-            tariffCategory: b.tariff_category || 'Domestic LT-1 Standard',
-            status: b.status,
-            uploadDate: b.created_at,
-            fileSize: b.file_size_bytes ? `${Math.round(b.file_size_bytes / 1024)} KB` : 'N/A',
-            ocrConfidence: b.ocr_confidence,
-            validation: b.raw_ocr_metadata?.validation || null,
-            breakdown: {
-              energyCharges: b.energy_charges_inr != null ? Number(b.energy_charges_inr) : null,
-              standingCharge: b.fixed_standing_charge_inr != null ? Number(b.fixed_standing_charge_inr) : null,
-              environmentalSurcharge: b.fuel_surcharge_fppca_inr != null ? Number(b.fuel_surcharge_fppca_inr) : null,
-              taxes: b.electricity_duty_taxes_inr != null ? Number(b.electricity_duty_taxes_inr) : null,
-            }
-          }));
-        }
-      } catch (err) {
-        console.warn('Database query for bills failed:', err.message);
-      }
-      return [];
+    if (error) {
+      console.error('getBills query error:', error.message);
+      throw new BillExtractionError(`Could not load bills: ${error.message}`, {
+        statusCode: 500,
+        code: 'BILL_LIST_FAILED',
+      });
     }
 
-    // Demo or evaluator session fallback
-    const userId = user?.id || 'usr-demo-001';
-    return demoBillsStore.get(userId) || [];
+    return (data || []).map((bill) => mapBillRow(bill, user.fullName));
   },
 
   /**
-   * Upload an electricity bill file, store in Supabase Storage, and run OCR extraction
+   * Upload a bill, store the original, extract fields, and persist a draft.
+   * Fails loudly if storage or database persistence fails.
    */
   async uploadBill({ file, user, scopedClient }) {
-    if (!file) {
-      throw new Error('No bill file provided for upload.');
+    requirePersistentUser(user, scopedClient);
+
+    if (!file || !Buffer.isBuffer(file.buffer) || file.buffer.length === 0) {
+      throw new BillExtractionError('No bill file provided for upload.', {
+        statusCode: 400,
+        code: 'EMPTY_FILE',
+      });
     }
 
-    // 1. Upload to Supabase Storage (best-effort)
-    let storagePath = `consumer/${user?.id || 'anon'}/${Date.now()}_${file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
-    let storageResult = { storagePath, isSimulated: true };
+    const fileSha256 = crypto.createHash('sha256').update(file.buffer).digest('hex');
 
-    if (user?.id) {
-      try {
-        const res = await storageService.uploadBillDocument({
-          userId: user.id,
-          fileName: file.originalname,
-          fileBuffer: file.buffer,
-          mimeType: file.mimetype,
-          orgId: user.organizationId || null,
-          scopedClient,
-        });
-        if (res?.storagePath) {
-          storagePath = res.storagePath;
-          storageResult = res;
-        }
-      } catch (storageErr) {
-        console.warn('Storage upload notice (OCR will continue from memory buffer):', storageErr.message);
-      }
-    }
-
-    // 2. Run OCR & AI Bill Extraction
     const extraction = await ocrService.processBillDocument({
       fileBuffer: file.buffer,
       mimeType: file.mimetype,
       fileName: file.originalname,
     });
 
-    const now = new Date();
-    let realBillId = 'bill-' + Date.now();
+    // Prevent obvious duplicate uploads when identity fields were extracted.
+    if (extraction.accountNumber && extraction.billingMonth) {
+      const { data: duplicates, error: duplicateError } = await scopedClient
+        .from('electricity_bills')
+        .select('id, status, file_name')
+        .eq('profile_id', user.id)
+        .eq('account_number', extraction.accountNumber)
+        .eq('billing_month', extraction.billingMonth)
+        .limit(1);
 
-    const newBillRecord = {
-      id: realBillId,
-      fileName: file.originalname,
-      accountNumber: extraction.accountNumber || null,
-      consumerName: extraction.consumerName || user?.fullName || null,
-      billingPeriod: extraction.billingPeriod || null,
-      billingMonth: extraction.billingMonth || null,
-      unitsConsumed: extraction.unitsConsumed != null ? Number(extraction.unitsConsumed) : null,
-      amount: extraction.totalAmount != null ? Number(extraction.totalAmount) : null,
-      dueDate: extraction.dueDate || null,
-      tariffCategory: extraction.tariffCategory || null,
-      status: 'EXTRACTED', // Awaiting user review/confirmation
-      ocrConfidence: extraction.confidenceScore || 0,
-      validation: extraction.validation,
-      uploadDate: now.toISOString(),
-      fileSize: `${Math.round(file.size / 1024)} KB`,
-      storagePath: storagePath,
-      breakdown: {
-        energyCharges: extraction.energyCharges != null ? Number(extraction.energyCharges) : null,
-        standingCharge: extraction.fixedCharges != null ? Number(extraction.fixedCharges) : null,
-        environmentalSurcharge: extraction.fuelAdjustments != null ? Number(extraction.fuelAdjustments) : null,
-        taxes: extraction.taxes != null ? Number(extraction.taxes) : null,
+      if (duplicateError) {
+        throw new BillExtractionError(`Could not check for duplicate bills: ${duplicateError.message}`, {
+          statusCode: 500,
+          code: 'DUPLICATE_CHECK_FAILED',
+        });
       }
-    };
-
-    // 3. Persist initial extracted draft to Supabase Database if authenticated
-    if (user && !user.isDemo && scopedClient) {
-      try {
-        let validDueDate = null;
-        if (extraction.dueDate) {
-          const d = new Date(extraction.dueDate);
-          if (!isNaN(d.getTime())) {
-            validDueDate = d.toISOString().split('T')[0];
-          }
-        }
-
-        const draftPayload = {
-          profile_id: user.id,
-          organization_id: user.organizationId || null,
-          file_name: file.originalname,
-          storage_path: storagePath,
-          file_size_bytes: file.size || 0,
-          mime_type: file.mimetype || 'application/pdf',
-          account_number: extraction.accountNumber || null,
-          consumer_name: newBillRecord.consumerName,
-          billing_month: extraction.billingMonth || null,
-          due_date: validDueDate,
-          units_consumed_kwh: Number(extraction.unitsConsumed || 0),
-          total_amount_inr: Number(extraction.totalAmount || 0),
-          energy_charges_inr: Number(extraction.energyCharges || 0),
-          fixed_standing_charge_inr: Number(extraction.fixedCharges || 0),
-          fuel_surcharge_fppca_inr: Number(extraction.fuelAdjustments || 0),
-          electricity_duty_taxes_inr: Number(extraction.taxes || 0),
-          status: 'EXTRACTED',
-          ocr_confidence: Number(extraction.confidenceScore || 0),
-          raw_ocr_metadata: extraction,
-          is_demo: false,
-        };
-
-        const { data, error } = await scopedClient
-          .from('electricity_bills')
-          .insert(draftPayload)
-          .select('id')
-          .maybeSingle();
-
-        if (error) {
-          console.warn('Initial electricity_bills draft insert note:', error.message);
-        } else if (data?.id) {
-          newBillRecord.id = data.id;
-        }
-      } catch (dbErr) {
-        console.warn('Initial bill record draft insert failed:', dbErr.message);
+      if (duplicates && duplicates.length > 0) {
+        throw new BillExtractionError(
+          `A bill for account ${extraction.accountNumber} and ${extraction.billingMonth} already exists. Delete the existing entry before re-uploading.`,
+          { statusCode: 409, code: 'DUPLICATE_BILL' }
+        );
       }
     }
 
-    return newBillRecord;
+    // The original document must be safely stored before the database row is created.
+    const storage = await storageService.uploadBillDocument({
+      userId: user.id,
+      fileName: file.originalname,
+      fileBuffer: file.buffer,
+      mimeType: file.mimetype,
+      orgId: user.organizationId || null,
+      scopedClient,
+    });
+
+    const draftPayload = {
+      profile_id: user.id,
+      organization_id: user.organizationId || null,
+      file_name: file.originalname,
+      storage_path: storage.storagePath,
+      file_size_bytes: file.size || file.buffer.length,
+      mime_type: file.mimetype,
+      utility_provider: extraction.discom || 'Unknown',
+      account_number: extraction.accountNumber || null,
+      consumer_name: extraction.consumerName || user.fullName || null,
+      billing_month: extraction.billingMonth || null,
+      billing_period_start: toIsoDate(extraction.billingPeriodStart),
+      billing_period_end: toIsoDate(extraction.billingPeriodEnd),
+      due_date: toIsoDate(extraction.dueDate),
+      tariff_category: extraction.tariffCategory || null,
+      units_consumed_kwh: Number(extraction.unitsConsumed ?? 0),
+      energy_charges_inr: Number(extraction.energyCharges ?? 0),
+      fixed_standing_charge_inr: Number(extraction.fixedCharges ?? 0),
+      fuel_surcharge_fppca_inr: Number(extraction.otherCharges ?? 0),
+      electricity_duty_taxes_inr: Number(extraction.taxes ?? 0),
+      total_amount_inr: Number(extraction.netPayable ?? 0),
+      status: 'EXTRACTED',
+      ocr_confidence: Number(extraction.confidenceScore ?? 0),
+      raw_ocr_metadata: {
+        ...extraction,
+        fileSha256,
+        storageBucket: storage.bucket,
+        aiModelUsed: extraction.aiModelUsed || null,
+        sourceEngine: extraction.sourceEngine || null,
+      },
+      is_demo: false,
+    };
+
+    const { data: inserted, error: insertError } = await scopedClient
+      .from('electricity_bills')
+      .insert(draftPayload)
+      .select('*')
+      .single();
+
+    if (insertError || !inserted) {
+      // Roll back the stored file so a failed save never looks successful.
+      try {
+        await storageService.deleteBillDocument(storage.storagePath, scopedClient);
+      } catch (cleanupError) {
+        console.warn('Could not remove stored bill after failed database insert:', cleanupError.message);
+      }
+      throw new BillExtractionError(`Database error saving bill: ${insertError?.message || 'Insert failed'}`, {
+        statusCode: 500,
+        code: 'BILL_SAVE_FAILED',
+      });
+    }
+
+    return {
+      ...mapBillRow(inserted, user.fullName),
+      extraction,
+    };
   },
 
   /**
-   * User confirms / edits extracted bill fields to finalize record
+   * User confirms or edits extracted bill fields to finalize the record.
+   * Writes consumption first, then marks the bill VERIFIED, then awards rewards.
    */
-  async confirmBill({ billId, confirmedData, user, scopedClient }) {
-    const units = parseFloat(confirmedData.unitsConsumed);
-    const amount = parseFloat(confirmedData.amount);
+  async confirmBill({ billId, confirmedData = {}, user, scopedClient }) {
+    requirePersistentUser(user, scopedClient);
 
-    if (isNaN(units) || isNaN(amount) || units <= 0 || amount <= 0) {
-      throw new Error('Valid units consumed and total amount are required to confirm a bill.');
-    }
-
-    // Safely parse due date
-    let validDueDate = null;
-    if (confirmedData.dueDate) {
-      const d = new Date(confirmedData.dueDate);
-      if (!isNaN(d.getTime())) {
-        validDueDate = d.toISOString().split('T')[0];
-      }
-    }
-
-    // If demo or unauthenticated evaluator session, store in demoBillsStore so history reflects it
-    if (!user || user.isDemo || !scopedClient) {
-      const userId = user?.id || 'usr-demo-001';
-      const existing = demoBillsStore.get(userId) || [];
-      const verifiedDemoBill = {
-        id: billId.startsWith('bill-') ? billId : ('bill-' + Date.now()),
-        fileName: confirmedData.fileName || 'verified_bill.pdf',
-        accountNumber: confirmedData.accountNumber || null,
-        consumerName: user?.fullName || 'Demo Evaluator',
-        billingMonth: confirmedData.billingMonth || 'N/A',
-        billingPeriod: confirmedData.billingMonth || 'Cycle',
-        unitsConsumed: units,
-        amount: amount,
-        dueDate: validDueDate,
-        tariffCategory: confirmedData.tariffCategory || 'Domestic LT-1 Standard',
-        status: 'VERIFIED',
-        uploadDate: new Date().toISOString(),
-        fileSize: confirmedData.fileSize || '380 KB',
-        ocrConfidence: Number(confirmedData.ocrConfidence || 0.95),
-        pointsAwarded: true,
-        breakdown: {
-          energyCharges: Number(confirmedData.breakdown?.energyCharges || Math.round(amount * 0.75 * 100) / 100),
-          standingCharge: Number(confirmedData.breakdown?.standingCharge || 120.00),
-          environmentalSurcharge: Number(confirmedData.breakdown?.environmentalSurcharge || 0.00),
-          taxes: Number(confirmedData.breakdown?.taxes || Math.round(amount * 0.06 * 100) / 100),
-        }
-      };
-
-      demoBillsStore.set(userId, [verifiedDemoBill, ...existing.filter(b => b.id !== billId)]);
-
-      return {
-        success: true,
-        data: verifiedDemoBill,
-        message: 'Bill verified! +100 Eco-Rewards added to your account.',
-      };
-    }
-
-    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(billId);
-    let savedBill = null;
-
-    // 1. If billId is a valid UUID, attempt to update the existing record
-    if (isUuid) {
-      const { data: updatedBill, error: updateErr } = await scopedClient
-        .from('electricity_bills')
-        .update({
-          units_consumed_kwh: units,
-          total_amount_inr: amount,
-          account_number: confirmedData.accountNumber || null,
-          billing_month: confirmedData.billingMonth || null,
-          due_date: validDueDate,
-          tariff_category: confirmedData.tariffCategory || 'Domestic LT-1 Standard',
-          status: 'VERIFIED',
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', billId)
-        .eq('profile_id', user.id)
-        .select('*')
-        .maybeSingle();
-
-      if (!updateErr && updatedBill) {
-        savedBill = updatedBill;
-      } else {
-        console.warn('Existing bill record update note:', updateErr?.message);
-      }
-    }
-
-    // 2. If update didn't match an existing row (or billId is temporary), insert verified bill
-    if (!savedBill) {
-      const storagePath = confirmedData.storagePath || `consumer/${user.id}/${Date.now()}_bill.pdf`;
-      const insertPayload = {
-        profile_id: user.id,
-        organization_id: user.organizationId || null,
-        file_name: confirmedData.fileName || 'verified_bill.pdf',
-        storage_path: storagePath,
-        file_size_bytes: confirmedData.fileSizeBytes || 2048,
-        mime_type: confirmedData.mimeType || 'application/pdf',
-        account_number: confirmedData.accountNumber || null,
-        consumer_name: user.fullName || 'Consumer',
-        billing_month: confirmedData.billingMonth || 'N/A',
-        due_date: validDueDate,
-        tariff_category: confirmedData.tariffCategory || 'Domestic LT-1 Standard',
-        units_consumed_kwh: units,
-        total_amount_inr: amount,
-        energy_charges_inr: Number(confirmedData.breakdown?.energyCharges || Math.round(amount * 0.75 * 100) / 100),
-        fixed_standing_charge_inr: Number(confirmedData.breakdown?.standingCharge || 120.00),
-        fuel_surcharge_fppca_inr: Number(confirmedData.breakdown?.environmentalSurcharge || 0.00),
-        electricity_duty_taxes_inr: Number(confirmedData.breakdown?.taxes || Math.round(amount * 0.06 * 100) / 100),
-        status: 'VERIFIED',
-        ocr_confidence: Number(confirmedData.ocrConfidence || 0.95),
-        raw_ocr_metadata: confirmedData,
-        is_demo: false,
-      };
-
-      const { data: newBill, error: insertErr } = await scopedClient
-        .from('electricity_bills')
-        .insert(insertPayload)
-        .select('*')
-        .single();
-
-      if (insertErr || !newBill) {
-        console.error('Failed to insert verified electricity bill:', insertErr?.message);
-        throw new Error(`Database error saving verified bill: ${insertErr?.message || 'Operation failed'}`);
-      }
-      savedBill = newBill;
-    }
-
-    const verifiedBillId = savedBill.id;
-
-    // 3. Persist to energy_consumption table for analytics
-    const carbon = calculateCarbonEmissions(units);
-    const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString();
-
-    const { error: consumptionErr } = await scopedClient
-      .from('energy_consumption')
-      .insert({
-        profile_id: user.id,
-        organization_id: user.organizationId || null,
-        bill_id: verifiedBillId,
-        interval_type: 'MONTHLY',
-        period_start: startOfMonth,
-        period_end: endOfMonth,
-        consumption_kwh: units,
-        cost_inr: amount,
-        carbon_kg_co2: carbon.carbonEmissionsKg,
-        data_classification: 'ACTUAL',
-        source_provenance: 'USER_CONFIRMED_BILL',
+    if (!UUID_RE.test(String(billId))) {
+      throw new BillExtractionError('A valid saved bill id is required before confirmation.', {
+        statusCode: 400,
+        code: 'INVALID_BILL_ID',
       });
-
-    if (consumptionErr) {
-      console.warn('energy_consumption insert note:', consumptionErr.message);
     }
 
-    // 4. Award 100 eco-reward points for bill confirmation
+    const units = Number(confirmedData.unitsConsumed);
+    const amount = Number(confirmedData.amount);
+    if (!Number.isFinite(units) || units < 0) {
+      throw new BillExtractionError('A valid non-negative units consumed value is required.', {
+        statusCode: 422,
+        code: 'INVALID_UNITS',
+      });
+    }
+    if (!Number.isFinite(amount)) {
+      throw new BillExtractionError('A valid net payable amount is required (negative values are allowed).', {
+        statusCode: 422,
+        code: 'INVALID_AMOUNT',
+      });
+    }
+
+    const { data: existingBill, error: fetchError } = await scopedClient
+      .from('electricity_bills')
+      .select('*')
+      .eq('id', billId)
+      .eq('profile_id', user.id)
+      .maybeSingle();
+
+    if (fetchError) {
+      throw new BillExtractionError(`Could not read the saved bill: ${fetchError.message}`, {
+        statusCode: 500,
+        code: 'BILL_READ_FAILED',
+      });
+    }
+    if (!existingBill) {
+      throw new BillExtractionError('Bill not found for this account.', {
+        statusCode: 404,
+        code: 'BILL_NOT_FOUND',
+      });
+    }
+
+    const wasVerified = existingBill.status === 'VERIFIED';
+    const dueDate = toIsoDate(confirmedData.dueDate) || existingBill.due_date || null;
+    const billingPeriodStart = toIsoDate(confirmedData.billingPeriodStart) || existingBill.billing_period_start || null;
+    const billingPeriodEnd = toIsoDate(confirmedData.billingPeriodEnd) || existingBill.billing_period_end || null;
+    const billingMonth = confirmedData.billingMonth || existingBill.billing_month || null;
+    const breakdown = confirmedData.breakdown || {};
+
+    const fieldUpdates = {
+      units_consumed_kwh: units,
+      total_amount_inr: amount,
+      account_number: confirmedData.accountNumber ?? existingBill.account_number ?? null,
+      consumer_name: confirmedData.consumerName || existingBill.consumer_name || user.fullName || null,
+      billing_month: billingMonth,
+      billing_period_start: billingPeriodStart,
+      billing_period_end: billingPeriodEnd,
+      due_date: dueDate,
+      tariff_category: confirmedData.tariffCategory ?? existingBill.tariff_category ?? null,
+      energy_charges_inr: breakdown.energyCharges != null ? Number(breakdown.energyCharges) : existingBill.energy_charges_inr,
+      fixed_standing_charge_inr: breakdown.standingCharge != null ? Number(breakdown.standingCharge) : existingBill.fixed_standing_charge_inr,
+      fuel_surcharge_fppca_inr: breakdown.environmentalSurcharge != null ? Number(breakdown.environmentalSurcharge) : existingBill.fuel_surcharge_fppca_inr,
+      electricity_duty_taxes_inr: breakdown.taxes != null ? Number(breakdown.taxes) : existingBill.electricity_duty_taxes_inr,
+      raw_ocr_metadata: {
+        ...(existingBill.raw_ocr_metadata || {}),
+        userConfirmed: {
+          at: new Date().toISOString(),
+          fields: {
+            accountNumber: confirmedData.accountNumber ?? null,
+            consumerName: confirmedData.consumerName ?? null,
+            billingMonth,
+            billingPeriodStart,
+            billingPeriodEnd,
+            dueDate,
+            tariffCategory: confirmedData.tariffCategory ?? null,
+            previousReading: confirmedData.previousReading != null ? Number(confirmedData.previousReading) : null,
+            currentReading: confirmedData.currentReading != null ? Number(confirmedData.currentReading) : null,
+            unitsConsumed: units,
+            energyCharges: breakdown.energyCharges != null ? Number(breakdown.energyCharges) : null,
+            fixedCharges: breakdown.standingCharge != null ? Number(breakdown.standingCharge) : null,
+            taxes: breakdown.taxes != null ? Number(breakdown.taxes) : null,
+            otherCharges: breakdown.environmentalSurcharge != null ? Number(breakdown.environmentalSurcharge) : null,
+            currentDemandPayable: confirmedData.currentDemandPayable != null ? Number(confirmedData.currentDemandPayable) : null,
+            arrears: confirmedData.arrears != null ? Number(confirmedData.arrears) : null,
+            netPayable: amount,
+          },
+        },
+      },
+      updated_at: new Date().toISOString(),
+    };
+
+    const { data: updatedBill, error: updateError } = await scopedClient
+      .from('electricity_bills')
+      .update(fieldUpdates)
+      .eq('id', billId)
+      .eq('profile_id', user.id)
+      .select('*')
+      .maybeSingle();
+
+    if (updateError || !updatedBill) {
+      throw new BillExtractionError(`Database error updating bill: ${updateError?.message || 'No row updated'}`, {
+        statusCode: 500,
+        code: 'BILL_UPDATE_FAILED',
+      });
+    }
+
+    // Persist consumption before marking the bill VERIFIED.
+    const periods = monthBounds(billingMonth, billingPeriodStart, billingPeriodEnd);
+    const carbon = calculateCarbonEmissions(units);
+
+    const { data: existingConsumption, error: consumptionLookupError } = await scopedClient
+      .from('energy_consumption')
+      .select('id')
+      .eq('bill_id', billId)
+      .eq('profile_id', user.id)
+      .maybeSingle();
+
+    if (consumptionLookupError) {
+      throw new BillExtractionError(`Could not check consumption records: ${consumptionLookupError.message}`, {
+        statusCode: 500,
+        code: 'CONSUMPTION_LOOKUP_FAILED',
+      });
+    }
+
+    const consumptionPayload = {
+      profile_id: user.id,
+      organization_id: existingBill.organization_id || user.organizationId || null,
+      bill_id: billId,
+      interval_type: 'MONTHLY',
+      period_start: periods.periodStart,
+      period_end: periods.periodEnd,
+      consumption_kwh: units,
+      cost_inr: amount,
+      carbon_kg_co2: carbon.carbonEmissionsKg,
+      data_classification: 'ACTUAL',
+      source_provenance: 'USER_CONFIRMED_BILL',
+    };
+
+    const consumptionResult = existingConsumption?.id
+      ? await scopedClient.from('energy_consumption').update(consumptionPayload).eq('id', existingConsumption.id)
+      : await scopedClient.from('energy_consumption').insert(consumptionPayload);
+
+    if (consumptionResult.error) {
+      throw new BillExtractionError(
+        `Database error saving consumption for this bill: ${consumptionResult.error.message}`,
+        { statusCode: 500, code: 'CONSUMPTION_SAVE_FAILED' }
+      );
+    }
+
+    const { error: verifyError } = await scopedClient
+      .from('electricity_bills')
+      .update({ status: 'VERIFIED', updated_at: new Date().toISOString() })
+      .eq('id', billId)
+      .eq('profile_id', user.id);
+
+    if (verifyError) {
+      throw new BillExtractionError(`Database error verifying bill: ${verifyError.message}`, {
+        statusCode: 500,
+        code: 'BILL_VERIFY_FAILED',
+      });
+    }
+
     let pointsAwarded = false;
-    try {
-      const { data: rewardAccount } = await scopedClient
-        .from('reward_accounts')
-        .select('id, current_points')
-        .eq('profile_id', user.id)
-        .maybeSingle();
+    let rewardWarning = null;
+    if (!wasVerified) {
+      try {
+        const { data: rewardAccount, error: rewardAccountError } = await scopedClient
+          .from('reward_accounts')
+          .select('id, current_points')
+          .eq('profile_id', user.id)
+          .maybeSingle();
 
-      if (rewardAccount) {
-        await scopedClient.from('reward_accounts').update({
-          current_points: rewardAccount.current_points + 100,
-          updated_at: new Date().toISOString(),
-        }).eq('id', rewardAccount.id);
+        if (rewardAccountError) throw rewardAccountError;
 
-        await scopedClient.from('reward_transactions').insert({
-          account_id: rewardAccount.id,
-          points_delta: 100,
-          transaction_type: 'EARNED_BILL_UPLOAD',
-          reference_description: `Earned 100 points for verified bill upload (${confirmedData.billingMonth || 'Current'})`,
-        });
-        pointsAwarded = true;
+        if (rewardAccount) {
+          const { data: existingReward } = await scopedClient
+            .from('reward_transactions')
+            .select('id')
+            .eq('account_id', rewardAccount.id)
+            .like('reference_description', `%${billId}%`)
+            .maybeSingle();
+
+          if (!existingReward) {
+            const { error: pointsError } = await scopedClient
+              .from('reward_accounts')
+              .update({
+                current_points: Number(rewardAccount.current_points || 0) + 100,
+                updated_at: new Date().toISOString(),
+              })
+              .eq('id', rewardAccount.id);
+            if (pointsError) throw pointsError;
+
+            const { error: transactionError } = await scopedClient
+              .from('reward_transactions')
+              .insert({
+                account_id: rewardAccount.id,
+                points_delta: 100,
+                transaction_type: 'EARNED_BILL_UPLOAD',
+                reference_description: `Bill verified ${billId}`,
+              });
+            if (transactionError) throw transactionError;
+            pointsAwarded = true;
+          }
+        }
+      } catch (rewardError) {
+        rewardWarning = `Bill verified, but Eco-Rewards could not be updated: ${rewardError.message}`;
+        console.warn('Eco-rewards sync notice:', rewardError.message);
       }
-    } catch (rewardErr) {
-      console.warn('Eco-rewards sync note:', rewardErr.message);
     }
 
     return {
       success: true,
       data: {
-        id: verifiedBillId,
-        fileName: savedBill.file_name,
-        accountNumber: savedBill.account_number,
-        consumerName: savedBill.consumer_name,
-        billingMonth: savedBill.billing_month,
-        billingPeriod: savedBill.billing_month || 'Cycle',
-        unitsConsumed: Number(savedBill.units_consumed_kwh),
-        amount: Number(savedBill.total_amount_inr),
-        dueDate: savedBill.due_date,
-        tariffCategory: savedBill.tariff_category,
-        status: savedBill.status,
-        uploadDate: savedBill.created_at,
-        fileSize: savedBill.file_size_bytes ? `${Math.round(savedBill.file_size_bytes / 1024)} KB` : 'N/A',
-        ocrConfidence: savedBill.ocr_confidence,
+        ...mapBillRow({ ...updatedBill, status: 'VERIFIED' }, user.fullName),
         pointsAwarded,
       },
       message: pointsAwarded
-        ? 'Bill verified! +100 Eco-Rewards added to your account.'
-        : 'Bill verified and added to energy consumption records.',
+        ? 'Bill verified and saved. +100 Eco-Rewards added.'
+        : rewardWarning || 'Bill verified and saved to your consumption history.',
     };
   },
 
   /**
-   * Delete an uploaded bill
+   * Delete a bill record and its stored original.
    */
   async deleteBill(billId, user, scopedClient) {
-    if (user && !user.isDemo && scopedClient) {
-      try {
-        await scopedClient
-          .from('electricity_bills')
-          .delete()
-          .eq('id', billId);
-      } catch (dbErr) {
-        console.warn('Could not delete bill from table:', dbErr.message);
-      }
-    } else {
-      const userId = user?.id || 'usr-demo-001';
-      const existing = demoBillsStore.get(userId) || [];
-      demoBillsStore.set(userId, existing.filter(b => b.id !== billId));
+    requirePersistentUser(user, scopedClient);
+
+    if (!UUID_RE.test(String(billId))) {
+      throw new BillExtractionError('A valid bill id is required.', {
+        statusCode: 400,
+        code: 'INVALID_BILL_ID',
+      });
     }
-    return { success: true };
-  }
+
+    const { data: bill, error: fetchError } = await scopedClient
+      .from('electricity_bills')
+      .select('id, storage_path')
+      .eq('id', billId)
+      .eq('profile_id', user.id)
+      .maybeSingle();
+
+    if (fetchError) {
+      throw new BillExtractionError(`Could not read the bill before deleting: ${fetchError.message}`, {
+        statusCode: 500,
+        code: 'BILL_READ_FAILED',
+      });
+    }
+    if (!bill) {
+      throw new BillExtractionError('Bill not found for this account.', {
+        statusCode: 404,
+        code: 'BILL_NOT_FOUND',
+      });
+    }
+
+    const { error: consumptionError } = await scopedClient
+      .from('energy_consumption')
+      .delete()
+      .eq('bill_id', billId)
+      .eq('profile_id', user.id);
+
+    if (consumptionError) {
+      throw new BillExtractionError(`Could not remove consumption records: ${consumptionError.message}`, {
+        statusCode: 500,
+        code: 'CONSUMPTION_DELETE_FAILED',
+      });
+    }
+
+    const { error: deleteError } = await scopedClient
+      .from('electricity_bills')
+      .delete()
+      .eq('id', billId)
+      .eq('profile_id', user.id);
+
+    if (deleteError) {
+      throw new BillExtractionError(`Could not delete the bill: ${deleteError.message}`, {
+        statusCode: 500,
+        code: 'BILL_DELETE_FAILED',
+      });
+    }
+
+    if (bill.storage_path) {
+      const removed = await storageService.deleteBillDocument(bill.storage_path, scopedClient);
+      if (!removed) {
+        console.warn('Bill row deleted but the stored document could not be removed.');
+      }
+    }
+
+    return { success: true, message: 'Bill record and stored document deleted.' };
+  },
 };

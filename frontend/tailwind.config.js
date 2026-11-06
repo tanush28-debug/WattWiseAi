@@ -40,23 +40,34 @@ export default {
         surface: {
           light: '#FFFFFF',
           ivory: '#F4F0E6',
-          card: '#FAF8F3',
+          card: '#FFFFFF',
           dark: '#151713',
           darkCard: '#1D201A',
-          darkBorder: '#292E25',
-          lightBorder: '#E5DFCFC7'
+          darkBorder: '#1E293B',
+          lightBorder: '#E2E8F0'
         }
+      },
+      borderRadius: {
+        none: '0px',
+        sm: '2px',
+        DEFAULT: '4px',
+        md: '4px',
+        lg: '6px',
+        xl: '6px',
+        '2xl': '6px',
+        '3xl': '6px',
+        full: '4px'
       },
       fontFamily: {
         sans: ['Plus Jakarta Sans', 'Inter', 'system-ui', '-apple-system', 'sans-serif'],
         mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
       },
       boxShadow: {
-        'subtle': '0 1px 3px 0 rgba(21, 23, 19, 0.05), 0 1px 2px 0 rgba(21, 23, 19, 0.03)',
-        'card': '0 4px 6px -1px rgba(21, 23, 19, 0.06), 0 2px 4px -1px rgba(21, 23, 19, 0.03)',
-        'card-hover': '0 10px 15px -3px rgba(21, 23, 19, 0.08), 0 4px 6px -2px rgba(21, 23, 19, 0.04)',
-        'cobalt-glow': '0 0 25px -4px rgba(36, 87, 245, 0.45)',
-        'cobalt-sm': '0 0 12px -2px rgba(36, 87, 245, 0.4)'
+        'subtle': 'none',
+        'card': '0 1px 2px 0 rgba(15, 23, 42, 0.04)',
+        'card-hover': '0 2px 4px 0 rgba(15, 23, 42, 0.06)',
+        'cobalt-glow': 'none',
+        'cobalt-sm': 'none'
       }
     },
   },

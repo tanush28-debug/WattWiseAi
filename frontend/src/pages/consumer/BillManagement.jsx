@@ -21,6 +21,108 @@ import { useToast } from '../../contexts/ToastContext';
 import { billService } from '../../services/billService';
 import { formatCurrency, formatKWh, formatDate, maskAccountNumber } from '../../utils/formatters';
 
+const EMPTY_REVIEW_FORM = {
+  consumerName: '',
+  accountNumber: '',
+  discom: '',
+  billingMonth: '',
+  billingPeriodStart: '',
+  billingPeriodEnd: '',
+  billIssueDate: '',
+  dueDate: '',
+  tariffCategory: 'Domestic LT-1 Standard',
+  previousReading: '',
+  currentReading: '',
+  unitsConsumed: '',
+  energyCharges: '',
+  fixedCharges: '',
+  taxes: '',
+  otherCharges: '',
+  arrears: '',
+  currentDemandPayable: '',
+  amount: '',
+};
+
+const buildReviewFormData = (bill = {}) => {
+  const extracted = bill.extraction || {};
+  const breakdown = bill.breakdown || {};
+  const pick = (...values) => values.find((value) => value !== null && value !== undefined && value !== '') ?? '';
+  const dateValue = (...values) => {
+    const value = pick(...values);
+    return typeof value === 'string' ? value.slice(0, 10) : value;
+  };
+
+  return {
+    consumerName: pick(extracted.consumerName, bill.consumerName),
+    accountNumber: pick(extracted.accountNumber, bill.accountNumber),
+    discom: pick(extracted.discom),
+    billingMonth: pick(extracted.billingMonth, bill.billingMonth),
+    billingPeriodStart: dateValue(extracted.billingPeriodStart, bill.billingPeriodStart),
+    billingPeriodEnd: dateValue(extracted.billingPeriodEnd, bill.billingPeriodEnd),
+    billIssueDate: dateValue(extracted.billIssueDate),
+    dueDate: dateValue(extracted.dueDate, bill.dueDate),
+    tariffCategory: pick(extracted.tariffCategory, bill.tariffCategory, 'Domestic LT-1 Standard'),
+    previousReading: pick(extracted.previousReading),
+    currentReading: pick(extracted.currentReading),
+    unitsConsumed: pick(extracted.unitsConsumed, bill.unitsConsumed),
+    energyCharges: pick(extracted.energyCharges, breakdown.energyCharges),
+    fixedCharges: pick(extracted.fixedCharges, breakdown.standingCharge),
+    taxes: pick(extracted.taxes, breakdown.taxes),
+    otherCharges: pick(extracted.otherCharges, breakdown.environmentalSurcharge),
+    arrears: pick(extracted.arrears),
+    currentDemandPayable: pick(extracted.currentDemandPayable),
+    amount: pick(extracted.netPayable, bill.amount),
+  };
+};
+
+const highlightFor = (bill, field) => {
+  const missing = bill?.missingFields || bill?.validation?.missingFields || [];
+  const uncertain = bill?.uncertainFields || bill?.validation?.uncertainFields || [];
+  if (missing.includes(field)) return 'missing';
+  if (uncertain.includes(field)) return 'uncertain';
+  return null;
+};
+
+const fieldTone = (highlight) => {
+  if (highlight === 'missing') return 'border-rose-400 bg-rose-50/70';
+  if (highlight === 'uncertain') return 'border-amber-400 bg-amber-50/70';
+  return 'border-ivory-300 bg-white';
+};
+
+const ReviewField = ({
+  label,
+  value,
+  onChange,
+  type = 'text',
+  step,
+  required = false,
+  highlight = null,
+  hint = null,
+  placeholder = '',
+}) => (
+  <div>
+    <label className="block text-midnight-700 font-semibold mb-1">
+      {label}
+      {required && <span className="text-rose-600"> *</span>}
+    </label>
+    <input
+      type={type}
+      step={step}
+      value={value ?? ''}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      className={`w-full px-3 py-2 border rounded-xl font-mono text-sm focus:outline-none focus:ring-2 focus:ring-cobalt-500 ${fieldTone(highlight)}`}
+    />
+    {hint && <p className="mt-1 text-[10px] text-midnight-500 leading-snug">{hint}</p>}
+  </div>
+);
+
+const toNumberOrNull = (value) => {
+  if (value === '' || value === null || value === undefined) return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
 export const BillManagement = () => {
   const [bills, setBills] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -31,14 +133,8 @@ export const BillManagement = () => {
   const [billToDelete, setBillToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [billToReview, setBillToReview] = useState(null);
-  const [reviewFormData, setReviewFormData] = useState({
-    accountNumber: '',
-    billingMonth: '',
-    unitsConsumed: '',
-    amount: '',
-    dueDate: '',
-    tariffCategory: 'Domestic LT-1 Standard',
-  });
+  const [reviewFormData, setReviewFormData] = useState({ ...EMPTY_REVIEW_FORM });
+  const [reviewConfirmed, setReviewConfirmed] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
 
   const fileInputRef = useRef(null);
@@ -47,11 +143,9 @@ export const BillManagement = () => {
   const fetchBills = async () => {
     try {
       const res = await billService.getBills();
-      if (res && Array.isArray(res.data)) {
-        setBills(res.data);
-      }
+      setBills(Array.isArray(res?.data) ? res.data : []);
     } catch (err) {
-      console.warn('Unable to retrieve uploaded bills:', err);
+      toast.error(err.message || 'Could not load saved bills.');
     } finally {
       setLoading(false);
     }
@@ -95,23 +189,16 @@ export const BillManagement = () => {
 
       if (result.success) {
         const d = result.data;
-        setReviewFormData({
-          accountNumber: d.accountNumber ?? '',
-          billingMonth: d.billingMonth ?? '',
-          unitsConsumed: d.unitsConsumed ?? '',
-          amount: d.amount ?? '',
-          dueDate: d.dueDate ?? '',
-          tariffCategory: d.tariffCategory || 'Domestic LT-1 Standard',
-        });
+        setReviewFormData(buildReviewFormData(d));
+        setReviewConfirmed(false);
         setBillToReview(d);
 
-        const hasFields = d.accountNumber || d.unitsConsumed || d.amount;
-        if (hasFields) {
-          toast.info('OCR complete! Please review and confirm extracted values.');
+        if (d.validation?.status === 'MANUAL_ENTRY_REQUIRED') {
+          toast.warning(result.message || 'Bill saved, but automatic extraction was incomplete. Enter the missing values and confirm.');
         } else {
-          toast.warning('OCR ran but could not extract fields automatically. Please fill in the details manually.');
+          toast.info(result.message || 'Bill extracted and saved as a draft. Review every field before confirming.');
         }
-        fetchBills();
+        await fetchBills();
       }
     } catch (err) {
       if (progressTimer) clearInterval(progressTimer);
@@ -141,67 +228,62 @@ export const BillManagement = () => {
   };
 
   const openReviewModal = (bill) => {
-    setReviewFormData({
-      accountNumber: bill.accountNumber || '',
-      billingMonth: bill.billingMonth || '',
-      unitsConsumed: bill.unitsConsumed || '',
-      amount: bill.amount || '',
-      dueDate: bill.dueDate || '',
-      tariffCategory: bill.tariffCategory || 'Domestic LT-1 Standard',
-    });
+    setReviewFormData(buildReviewFormData(bill));
+    setReviewConfirmed(false);
     setBillToReview(bill);
     if (selectedBill) setSelectedBill(null);
+  };
+
+  const updateReviewField = (field, value) => {
+    setReviewFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleConfirmBill = async (e) => {
     if (e) e.preventDefault();
     if (!billToReview) return;
+    if (!reviewConfirmed) {
+      toast.warning('Tick the confirmation checkbox after verifying every field.');
+      return;
+    }
+
+    const units = toNumberOrNull(reviewFormData.unitsConsumed);
+    const amount = toNumberOrNull(reviewFormData.amount);
+    if (units === null || amount === null) {
+      toast.error('Units consumed and net payable amount are required before confirming.');
+      return;
+    }
+
     setIsConfirming(true);
     try {
       const confirmPayload = {
-        ...reviewFormData,
-        fileName: billToReview.fileName,
-        fileSize: billToReview.fileSize,
-        storagePath: billToReview.storagePath,
-        breakdown: billToReview.breakdown,
-        ocrConfidence: billToReview.ocrConfidence,
+        consumerName: reviewFormData.consumerName || null,
+        accountNumber: reviewFormData.accountNumber || null,
+        billingMonth: reviewFormData.billingMonth || null,
+        billingPeriodStart: reviewFormData.billingPeriodStart || null,
+        billingPeriodEnd: reviewFormData.billingPeriodEnd || null,
+        dueDate: reviewFormData.dueDate || null,
+        tariffCategory: reviewFormData.tariffCategory || null,
+        previousReading: toNumberOrNull(reviewFormData.previousReading),
+        currentReading: toNumberOrNull(reviewFormData.currentReading),
+        unitsConsumed: units,
+        currentDemandPayable: toNumberOrNull(reviewFormData.currentDemandPayable),
+        arrears: toNumberOrNull(reviewFormData.arrears),
+        amount,
+        breakdown: {
+          energyCharges: toNumberOrNull(reviewFormData.energyCharges),
+          standingCharge: toNumberOrNull(reviewFormData.fixedCharges),
+          environmentalSurcharge: toNumberOrNull(reviewFormData.otherCharges),
+          taxes: toNumberOrNull(reviewFormData.taxes),
+        },
       };
 
       const res = await billService.confirmBill(billToReview.id, confirmPayload);
-      const savedBill = res?.data || res;
-
-      toast.success(res?.message || 'Bill verified! Added to your official consumption records.');
+      toast.success(res?.message || 'Bill verified and saved.');
       setBillToReview(null);
-
-      // Optimistically update table immediately so there is zero latency
-      if (savedBill) {
-        setBills((prev) => {
-          const filtered = prev.filter((b) => b.id !== billToReview.id && b.id !== savedBill.id);
-          return [
-            {
-              id: savedBill.id || ('bill-' + Date.now()),
-              fileName: savedBill.fileName || billToReview.fileName || 'Verified Bill',
-              accountNumber: savedBill.accountNumber || reviewFormData.accountNumber,
-              billingMonth: savedBill.billingMonth || reviewFormData.billingMonth,
-              billingPeriod: savedBill.billingMonth || reviewFormData.billingMonth || 'Cycle',
-              unitsConsumed: Number(savedBill.unitsConsumed || reviewFormData.unitsConsumed),
-              amount: Number(savedBill.amount || reviewFormData.amount),
-              dueDate: savedBill.dueDate || reviewFormData.dueDate,
-              tariffCategory: savedBill.tariffCategory || reviewFormData.tariffCategory,
-              status: 'VERIFIED',
-              uploadDate: new Date().toISOString(),
-              fileSize: billToReview.fileSize || 'N/A',
-              ocrConfidence: billToReview.ocrConfidence,
-            },
-            ...filtered
-          ];
-        });
-      }
-
-      // Synchronize with database
+      setReviewConfirmed(false);
       await fetchBills();
     } catch (err) {
-      toast.error(err.message || 'Failed to confirm bill record.');
+      toast.error(err.message || 'Failed to verify and save this bill.');
     } finally {
       setIsConfirming(false);
     }
@@ -235,7 +317,7 @@ export const BillManagement = () => {
       setBills((prev) => prev.filter((b) => b.id !== billToDelete.id));
       setBillToDelete(null);
     } catch (err) {
-      toast.error('Failed to remove bill record');
+      toast.error(err.message || 'Failed to remove bill record.');
     } finally {
       setIsDeleting(false);
     }
@@ -286,17 +368,20 @@ export const BillManagement = () => {
       header: 'Status',
       key: 'status',
       render: (val) => {
-        const isExtracted = val === 'EXTRACTED';
+        const isVerified = val === 'VERIFIED';
+        const isFailed = val === 'FAILED';
         return (
           <span
             className={`inline-flex items-center gap-1 font-mono text-[10px] px-2 py-0.5 rounded-full font-semibold ${
-              isExtracted
+              isVerified
                 ? 'bg-emerald-500/10 text-emerald-800 border border-emerald-500/30'
-                : 'bg-amber-500/10 text-amber-800 border border-amber-500/30'
+                : isFailed
+                  ? 'bg-rose-500/10 text-rose-800 border border-rose-500/30'
+                  : 'bg-amber-500/10 text-amber-800 border border-amber-500/30'
             }`}
           >
-            {isExtracted ? <CheckCircle2 className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
-            {val}
+            {isVerified ? <CheckCircle2 className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
+            {isVerified ? 'VERIFIED' : val === 'EXTRACTED' ? 'NEEDS REVIEW' : val}
           </span>
         );
       }
@@ -334,12 +419,17 @@ export const BillManagement = () => {
     }
   ];
 
+  const reviewWarnings = billToReview
+    ? Array.from(new Set([...(billToReview.warnings || []), ...(billToReview.validation?.warnings || [])]))
+    : [];
+  const reviewEvidence = billToReview?.evidence || billToReview?.extraction?.evidence || {};
+
   return (
     <div className="space-y-8">
       <div>
         <h2 className="text-2xl font-black text-midnight-900 tracking-tight">Electricity Bill Management</h2>
         <p className="text-xs text-midnight-600 mt-0.5">
-          Upload utility PDF statements or photos. Our backend OCR automatically verifies and extracts consumption parameters.
+          Upload a utility PDF or photo. WattWise extracts the bill fields and saves a draft; nothing is marked verified until you review and confirm it.
         </p>
       </div>
 
@@ -426,7 +516,9 @@ export const BillManagement = () => {
               <div>
                 <p className="text-[10px] font-mono text-midnight-500 uppercase tracking-wider">Total Amount Due</p>
                 <p className="text-2xl font-black text-midnight-900 mt-0.5 font-sans">
-                  {formatCurrency(selectedBill.amount)}
+                  {selectedBill.extraction?.netPayable != null || selectedBill.amount != null
+                    ? formatCurrency(selectedBill.extraction?.netPayable ?? selectedBill.amount)
+                    : 'Not extracted'}
                 </p>
               </div>
               <div className="text-right">
@@ -454,15 +546,57 @@ export const BillManagement = () => {
               </div>
               <div className="flex justify-between py-2 border-b border-ivory-200">
                 <span className="text-midnight-600">Tariff Classification</span>
-                <span className="font-semibold text-midnight-900">{selectedBill.tariffCategory}</span>
+                <span className="font-semibold text-midnight-900">{selectedBill.tariffCategory || 'Not extracted'}</span>
+              </div>
+              <div className="flex justify-between py-2 border-b border-ivory-200">
+                <span className="text-midnight-600">Net Payable (Final Amount)</span>
+                <span className="font-mono font-semibold text-midnight-900">{formatCurrency(selectedBill.amount)}</span>
+              </div>
+              <div className="flex justify-between py-2 border-b border-ivory-200">
+                <span className="text-midnight-600">Current Demand Payable</span>
+                <span className="font-mono font-semibold text-midnight-900">
+                  {selectedBill.extraction?.currentDemandPayable != null
+                    ? formatCurrency(selectedBill.extraction.currentDemandPayable)
+                    : 'Not extracted'}
+                </span>
+              </div>
+              <div className="flex justify-between py-2 border-b border-ivory-200">
+                <span className="text-midnight-600">Arrears</span>
+                <span className="font-mono font-semibold text-midnight-900">
+                  {selectedBill.extraction?.arrears != null ? formatCurrency(selectedBill.extraction.arrears) : 'Not extracted'}
+                </span>
+              </div>
+              <div className="flex justify-between py-2 border-b border-ivory-200">
+                <span className="text-midnight-600">Meter Readings (Prev → Curr)</span>
+                <span className="font-mono font-semibold text-midnight-900">
+                  {selectedBill.extraction?.previousReading ?? '—'} → {selectedBill.extraction?.currentReading ?? '—'}
+                </span>
               </div>
               <div className="flex justify-between py-2 border-b border-ivory-200">
                 <span className="text-midnight-600">OCR Extraction Status</span>
-                <span className="font-mono font-bold text-emerald-700 bg-emerald-500/10 px-2 py-0.5 rounded">
-                  {selectedBill.status}
+                <span className={`font-mono font-bold px-2 py-0.5 rounded ${
+                  selectedBill.status === 'VERIFIED'
+                    ? 'text-emerald-700 bg-emerald-500/10'
+                    : 'text-amber-700 bg-amber-500/10'
+                }`}>
+                  {selectedBill.status === 'EXTRACTED' ? 'NEEDS REVIEW' : selectedBill.status}
                 </span>
               </div>
             </div>
+
+            {(selectedBill.warnings?.length > 0 || selectedBill.validation?.warnings?.length > 0) && (
+              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-[11px] text-rose-900 space-y-1.5">
+                <p className="font-bold flex items-center gap-1.5">
+                  <AlertTriangle className="w-4 h-4 text-rose-600" />
+                  Validation warnings
+                </p>
+                <ul className="list-disc pl-5 space-y-1">
+                  {Array.from(new Set([...(selectedBill.warnings || []), ...(selectedBill.validation?.warnings || [])])).map((warning, index) => (
+                    <li key={index}>{warning}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             {selectedBill.breakdown && (
               <div className="bg-ivory-50 p-4 rounded-xl border border-ivory-200 space-y-2 text-xs">
@@ -522,112 +656,262 @@ export const BillManagement = () => {
       >
         {billToReview && (
           <form onSubmit={handleConfirmBill} className="space-y-4">
-            <div className="p-3 bg-cobalt-50 border border-cobalt-200/60 rounded-xl flex items-center justify-between text-xs">
+            <div className="p-3 bg-cobalt-50 border border-cobalt-200/60 rounded-xl flex items-center justify-between gap-3 text-xs">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-cobalt-600 shrink-0" />
                 <span className="font-semibold text-midnight-900">
                   {billToReview.ocrConfidence && billToReview.ocrConfidence > 0
-                    ? `Extraction Confidence: ${Math.round(billToReview.ocrConfidence * 100)}%`
-                    : 'Manual Verification Required'}
+                    ? `Extraction confidence: ${Math.round(billToReview.ocrConfidence * 100)}%`
+                    : 'Manual verification required'}
                 </span>
               </div>
-              <span className={`font-mono text-[10px] px-2 py-0.5 rounded font-bold ${
+              <span className={`font-mono text-[10px] px-2 py-0.5 rounded font-bold text-right ${
                 billToReview.validation?.status === 'HIGH_CONFIDENCE'
                   ? 'text-emerald-700 bg-emerald-100/80'
                   : 'text-amber-800 bg-amber-100/80'
               }`}>
-                {billToReview.sourceEngine || 'Extracted from File'}
+                {billToReview.sourceEngine || 'Extracted from file'}
               </span>
             </div>
 
-            {(!billToReview.ocrConfidence || billToReview.ocrConfidence === 0) && (
+            <p className="text-[11px] text-midnight-500 leading-relaxed">
+              Confidence values are heuristic indicators, not calibrated probabilities. Fields outlined in
+              <span className="font-semibold text-amber-700"> amber </span>are uncertain and
+              <span className="font-semibold text-rose-700"> red </span>fields were not extracted. Compare every value with the original bill.
+            </p>
+
+            {billToReview.validation?.status === 'MANUAL_ENTRY_REQUIRED' && (
               <div className="p-2.5 bg-amber-50 border border-amber-200 rounded-xl text-[11px] text-amber-900 flex items-start gap-2">
                 <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                <span>
-                  Automatic text extraction was incomplete. Please verify and enter the details from your bill below.
-                </span>
+                <span>Automatic extraction could not confirm the net payable amount and/or billed units. Enter them from the bill before confirming.</span>
               </div>
             )}
 
-            <p className="text-xs text-midnight-600 leading-relaxed">
-              Verify the parsed billing attributes before saving to your official consumption analytics:
-            </p>
+            {reviewWarnings.length > 0 && (
+              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-[11px] text-rose-900 space-y-1.5">
+                <p className="font-bold flex items-center gap-1.5">
+                  <AlertTriangle className="w-4 h-4 text-rose-600" />
+                  Validation warnings
+                </p>
+                <ul className="list-disc pl-5 space-y-1">
+                  {reviewWarnings.map((warning, index) => (
+                    <li key={index}>{warning}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
-            <div className="space-y-3 text-xs">
+            <div className="space-y-4 text-xs">
               <div>
-                <label className="block text-midnight-700 font-semibold mb-1">Account Number / Consumer ID</label>
-                <input
-                  type="text"
-                  value={reviewFormData.accountNumber}
-                  onChange={(e) => setReviewFormData({ ...reviewFormData, accountNumber: e.target.value })}
-                  className="w-full px-3 py-2 border border-ivory-300 rounded-xl font-mono text-sm focus:outline-none focus:ring-2 focus:ring-cobalt-500 bg-white"
-                  required
-                />
+                <p className="font-bold text-midnight-900 mb-2">Consumer & bill identity</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <ReviewField
+                    label="Consumer Name"
+                    value={reviewFormData.consumerName}
+                    onChange={(value) => updateReviewField('consumerName', value)}
+                    highlight={highlightFor(billToReview, 'consumerName')}
+                  />
+                  <ReviewField
+                    label="Account / Consumer Number"
+                    value={reviewFormData.accountNumber}
+                    onChange={(value) => updateReviewField('accountNumber', value)}
+                    highlight={highlightFor(billToReview, 'accountNumber')}
+                  />
+                  <ReviewField
+                    label="DISCOM / Provider"
+                    value={reviewFormData.discom}
+                    onChange={(value) => updateReviewField('discom', value)}
+                    highlight={highlightFor(billToReview, 'discom')}
+                  />
+                  <div>
+                    <label className="block text-midnight-700 font-semibold mb-1">Tariff Category</label>
+                    <select
+                      value={reviewFormData.tariffCategory}
+                      onChange={(e) => updateReviewField('tariffCategory', e.target.value)}
+                      className={`w-full px-3 py-2 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-cobalt-500 ${fieldTone(highlightFor(billToReview, 'tariffCategory'))}`}
+                    >
+                      <option value="Domestic LT-1 Standard">Domestic LT-1 Standard (Urban)</option>
+                      <option value="Domestic LT-1 Time-of-Day">Domestic LT-1 Time-of-Day (ToD)</option>
+                      <option value="Commercial LT-2">Commercial LT-2 (Shops/Offices)</option>
+                      <option value="Agricultural PM-KUSUM">Agricultural PM-KUSUM</option>
+                      <option value="Industrial HT-2a">Industrial HT-2a High Voltage</option>
+                    </select>
+                  </div>
+                </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-midnight-700 font-semibold mb-1">Billing Month</label>
-                  <input
-                    type="text"
+              <div>
+                <p className="font-bold text-midnight-900 mb-2">Billing period</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <ReviewField
+                    label="Billing Month"
                     value={reviewFormData.billingMonth}
-                    onChange={(e) => setReviewFormData({ ...reviewFormData, billingMonth: e.target.value })}
-                    className="w-full px-3 py-2 border border-ivory-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-cobalt-500 bg-white"
+                    onChange={(value) => updateReviewField('billingMonth', value)}
+                    highlight={highlightFor(billToReview, 'billingMonth')}
                     placeholder="e.g. October 2026"
-                    required
                   />
-                </div>
-                <div>
-                  <label className="block text-midnight-700 font-semibold mb-1">Payment Due Date</label>
-                  <input
+                  <ReviewField
+                    label="Bill Issue / Reading Date"
                     type="date"
-                    value={reviewFormData.dueDate ? reviewFormData.dueDate.split('T')[0] : ''}
-                    onChange={(e) => setReviewFormData({ ...reviewFormData, dueDate: e.target.value })}
-                    className="w-full px-3 py-2 border border-ivory-300 rounded-xl font-mono text-sm focus:outline-none focus:ring-2 focus:ring-cobalt-500 bg-white"
+                    value={reviewFormData.billIssueDate}
+                    onChange={(value) => updateReviewField('billIssueDate', value)}
+                    highlight={highlightFor(billToReview, 'billIssueDate')}
+                  />
+                  <ReviewField
+                    label="Billing Period Start"
+                    type="date"
+                    value={reviewFormData.billingPeriodStart}
+                    onChange={(value) => updateReviewField('billingPeriodStart', value)}
+                    highlight={highlightFor(billToReview, 'billingPeriodStart')}
+                  />
+                  <ReviewField
+                    label="Billing Period End"
+                    type="date"
+                    value={reviewFormData.billingPeriodEnd}
+                    onChange={(value) => updateReviewField('billingPeriodEnd', value)}
+                    highlight={highlightFor(billToReview, 'billingPeriodEnd')}
+                  />
+                  <ReviewField
+                    label="Payment Due Date"
+                    type="date"
+                    value={reviewFormData.dueDate}
+                    onChange={(value) => updateReviewField('dueDate', value)}
+                    highlight={highlightFor(billToReview, 'dueDate')}
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-midnight-700 font-semibold mb-1">Units Consumed (kWh)</label>
-                  <input
+              <div>
+                <p className="font-bold text-midnight-900 mb-2">Meter readings & consumption</p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <ReviewField
+                    label="Previous Reading"
+                    type="number"
+                    step="0.001"
+                    value={reviewFormData.previousReading}
+                    onChange={(value) => updateReviewField('previousReading', value)}
+                    highlight={highlightFor(billToReview, 'previousReading')}
+                  />
+                  <ReviewField
+                    label="Current Reading"
+                    type="number"
+                    step="0.001"
+                    value={reviewFormData.currentReading}
+                    onChange={(value) => updateReviewField('currentReading', value)}
+                    highlight={highlightFor(billToReview, 'currentReading')}
+                  />
+                  <ReviewField
+                    label="Units Consumed (kWh)"
                     type="number"
                     step="0.1"
+                    required
                     value={reviewFormData.unitsConsumed}
-                    onChange={(e) => setReviewFormData({ ...reviewFormData, unitsConsumed: e.target.value })}
-                    className="w-full px-3 py-2 border border-ivory-300 rounded-xl font-mono text-sm focus:outline-none focus:ring-2 focus:ring-cobalt-500 bg-white font-bold"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-midnight-700 font-semibold mb-1">Total Bill Amount (₹)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={reviewFormData.amount}
-                    onChange={(e) => setReviewFormData({ ...reviewFormData, amount: e.target.value })}
-                    className="w-full px-3 py-2 border border-ivory-300 rounded-xl font-mono text-sm focus:outline-none focus:ring-2 focus:ring-cobalt-500 bg-white font-bold"
-                    required
+                    onChange={(value) => updateReviewField('unitsConsumed', value)}
+                    highlight={highlightFor(billToReview, 'unitsConsumed')}
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-midnight-700 font-semibold mb-1">Tariff Classification</label>
-                <select
-                  value={reviewFormData.tariffCategory}
-                  onChange={(e) => setReviewFormData({ ...reviewFormData, tariffCategory: e.target.value })}
-                  className="w-full px-3 py-2 border border-ivory-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-cobalt-500 bg-white"
-                >
-                  <option value="Domestic LT-1 Standard">Domestic LT-1 Standard (Urban)</option>
-                  <option value="Domestic LT-1 Time-of-Day">Domestic LT-1 Time-of-Day (ToD)</option>
-                  <option value="Commercial LT-2">Commercial LT-2 (Shops/Offices)</option>
-                  <option value="Agricultural PM-KUSUM">Agricultural PM-KUSUM</option>
-                  <option value="Industrial HT-2a">Industrial HT-2a High Voltage</option>
-                </select>
+                <p className="font-bold text-midnight-900 mb-2">Charges as printed</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <ReviewField
+                    label="Energy Charges (₹)"
+                    type="number"
+                    step="0.01"
+                    value={reviewFormData.energyCharges}
+                    onChange={(value) => updateReviewField('energyCharges', value)}
+                    highlight={highlightFor(billToReview, 'energyCharges')}
+                  />
+                  <ReviewField
+                    label="Fixed / Standing Charges (₹)"
+                    type="number"
+                    step="0.01"
+                    value={reviewFormData.fixedCharges}
+                    onChange={(value) => updateReviewField('fixedCharges', value)}
+                    highlight={highlightFor(billToReview, 'fixedCharges')}
+                  />
+                  <ReviewField
+                    label="Other Charges / FPPCA & Surcharges (₹)"
+                    type="number"
+                    step="0.01"
+                    value={reviewFormData.otherCharges}
+                    onChange={(value) => updateReviewField('otherCharges', value)}
+                    highlight={highlightFor(billToReview, 'otherCharges')}
+                  />
+                  <ReviewField
+                    label="Taxes / Electricity Duty (₹)"
+                    type="number"
+                    step="0.01"
+                    value={reviewFormData.taxes}
+                    onChange={(value) => updateReviewField('taxes', value)}
+                    highlight={highlightFor(billToReview, 'taxes')}
+                  />
+                </div>
               </div>
+
+              <div>
+                <p className="font-bold text-midnight-900 mb-2">Payables</p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <ReviewField
+                    label="Current Demand Payable (₹)"
+                    type="number"
+                    step="0.01"
+                    value={reviewFormData.currentDemandPayable}
+                    onChange={(value) => updateReviewField('currentDemandPayable', value)}
+                    highlight={highlightFor(billToReview, 'currentDemandPayable')}
+                    hint="Current cycle only; excludes arrears."
+                  />
+                  <ReviewField
+                    label="Arrears (₹)"
+                    type="number"
+                    step="0.01"
+                    value={reviewFormData.arrears}
+                    onChange={(value) => updateReviewField('arrears', value)}
+                    highlight={highlightFor(billToReview, 'arrears')}
+                    hint="Negative values indicate a credit."
+                  />
+                  <ReviewField
+                    label="Net Payable / Final Amount (₹)"
+                    type="number"
+                    step="0.01"
+                    required
+                    value={reviewFormData.amount}
+                    onChange={(value) => updateReviewField('amount', value)}
+                    highlight={highlightFor(billToReview, 'netPayable')}
+                    hint="The final amount printed on the bill. Negative values are allowed."
+                  />
+                </div>
+              </div>
+
+              {Object.keys(reviewEvidence).length > 0 && (
+                <details className="rounded-xl border border-ivory-300 bg-ivory-50 p-3">
+                  <summary className="cursor-pointer font-semibold text-midnight-800">
+                    Source evidence from the document ({Object.keys(reviewEvidence).length} fields)
+                  </summary>
+                  <dl className="mt-2 space-y-1.5 text-[11px] text-midnight-600">
+                    {Object.entries(reviewEvidence).slice(0, 20).map(([field, snippet]) => (
+                      <div key={field} className="flex gap-2">
+                        <dt className="font-mono font-semibold text-midnight-800 shrink-0">{field}:</dt>
+                        <dd className="break-words">{String(snippet).slice(0, 200)}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </details>
+              )}
             </div>
+
+            <label className="flex items-start gap-2.5 p-3 rounded-xl border border-ivory-300 bg-ivory-50 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={reviewConfirmed}
+                onChange={(e) => setReviewConfirmed(e.target.checked)}
+                className="mt-0.5 h-4 w-4 accent-cobalt-600"
+              />
+              <span className="text-[11px] text-midnight-700 leading-relaxed">
+                I have compared these values with the original bill and confirm they are correct. I understand this will be saved as a verified record and used in consumption analytics.
+              </span>
+            </label>
 
             <div className="pt-2 flex items-center justify-end gap-3">
               <Button
@@ -642,9 +926,10 @@ export const BillManagement = () => {
                 type="submit"
                 variant="primary"
                 isLoading={isConfirming}
+                disabled={!reviewConfirmed || isConfirming}
                 leftIcon={CheckCircle2}
               >
-                Confirm & Save to Records (+100 Pts)
+                Confirm & Save to Records
               </Button>
             </div>
           </form>

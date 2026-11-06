@@ -7,7 +7,9 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "test": "node tests/core_services.test.js"
+    "import:bescom": "node scripts/import_bescom_consumption.mjs",
+    "provision:demo": "node scripts/provision_demo_accounts.mjs",
+    "test": "node tests/core_services.test.js && node tests/bill_parser.test.mjs && node tests/api_smoke.test.mjs"
   },
   "keywords": [
     "energy",

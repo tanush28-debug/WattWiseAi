@@ -43,28 +43,28 @@ export const ToastProvider = ({ children }) => {
             };
 
             const borderColors = {
-              success: 'border-emerald-500/40 bg-midnight-900/95 text-ivory-100',
-              warning: 'border-amber-500/40 bg-midnight-900/95 text-ivory-100',
-              error: 'border-rose-500/40 bg-midnight-900/95 text-ivory-100',
-              info: 'border-cobalt-500/40 bg-midnight-900/95 text-ivory-100'
+              success: 'border-emerald-700 bg-slate-900 text-slate-100',
+              warning: 'border-amber-700 bg-slate-900 text-slate-100',
+              error: 'border-rose-700 bg-slate-900 text-slate-100',
+              info: 'border-cobalt-700 bg-slate-900 text-slate-100'
             };
 
             return (
               <motion.div
                 key={t.id}
-                initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.15 } }}
-                className={`pointer-events-auto flex items-start gap-3 p-4 rounded-xl border shadow-xl backdrop-blur-md ${borderColors[t.type]}`}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 8, transition: { duration: 0.12 } }}
+                className={`pointer-events-auto flex items-start gap-3 rounded-md border p-4 shadow-lg ${borderColors[t.type]}`}
               >
                 {icons[t.type]}
                 <div className="flex-1 min-w-0">
                   {t.title && <h4 className="text-sm font-semibold tracking-tight">{t.title}</h4>}
-                  <p className="text-xs text-ivory-300 mt-0.5 leading-relaxed">{t.message}</p>
+                  <p className="mt-0.5 text-xs leading-relaxed text-slate-300">{t.message}</p>
                 </div>
                 <button
                   onClick={() => removeToast(t.id)}
-                  className="text-ivory-400 hover:text-ivory-100 transition-colors p-0.5"
+                  className="p-0.5 text-slate-400 transition-colors hover:text-slate-100"
                 >
                   <X className="w-4 h-4" />
                 </button>

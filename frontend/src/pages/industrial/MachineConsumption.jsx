@@ -9,10 +9,14 @@ import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { useToast } from '../../contexts/ToastContext';
 import { industrialService } from '../../services/industrialService';
 import { formatKWh } from '../../utils/formatters';
-import { Cpu, Plus, Info, Clock, Zap } from 'lucide-react';
+import { Cpu, Plus, Info, Clock, Zap, Database } from 'lucide-react';
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export const MachineConsumption = () => {
   const [machines, setMachines] = useState([]);
+  const [overview, setOverview] = useState(null);
+  const [facilities, setFacilities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -20,7 +24,7 @@ export const MachineConsumption = () => {
   // Form State
   const [name, setName] = useState('');
   const [category, setCategory] = useState('Machining');
-  const [facility, setFacility] = useState('Plant A');
+  const [facilityId, setFacilityId] = useState('');
   const [powerRatingKW, setPowerRatingKW] = useState('50');
   const [operatingHoursPerDay, setOperatingHoursPerDay] = useState('16');
   const [reportingPeriod, setReportingPeriod] = useState('Monthly');
@@ -29,10 +33,22 @@ export const MachineConsumption = () => {
 
   const fetchMachines = async () => {
     try {
-      const res = await industrialService.getMachines();
-      setMachines(res.data);
+      const [machinesRes, overviewRes] = await Promise.all([
+        industrialService.getMachines(),
+        industrialService.getOverview(),
+      ]);
+      setMachines(machinesRes.data || []);
+      setOverview(overviewRes.data);
+
+      const registeredFacilities = (overviewRes.data?.isBenchmark
+        ? []
+        : overviewRes.data?.facilities || []
+      ).filter((facility) => UUID_RE.test(String(facility.id)));
+
+      setFacilities(registeredFacilities);
+      setFacilityId((current) => current || registeredFacilities[0]?.id || '');
     } catch (err) {
-      toast.error('Unable to fetch machine entries');
+      toast.error(err.message || 'Unable to fetch machine entries');
     } finally {
       setLoading(false);
     }
@@ -49,12 +65,17 @@ export const MachineConsumption = () => {
       return;
     }
 
+    if (!facilityId) {
+      toast.error('Select a registered facility before saving equipment');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const res = await industrialService.addMachineEntry({
+        facilityId,
         name,
         category,
-        facility,
         powerRatingKW,
         operatingHoursPerDay,
         reportingPeriod
@@ -67,7 +88,7 @@ export const MachineConsumption = () => {
         fetchMachines();
       }
     } catch (err) {
-      toast.error('Failed to log machine consumption');
+      toast.error(err.message || 'Failed to save machine record');
     } finally {
       setIsSubmitting(false);
     }
@@ -128,6 +149,47 @@ export const MachineConsumption = () => {
     }
   ];
 
+  const isBenchmark = overview?.isBenchmark;
+  const formatMW = (value) =>
+    value === null || value === undefined
+      ? '—'
+      : new Intl.NumberFormat('en-IN', { maximumFractionDigits: 2 }).format(value);
+
+  const unitColumns = [
+    { header: 'Plant', key: 'name' },
+    { header: 'Fuel', key: 'fuel' },
+    {
+      header: 'Generating Units',
+      key: 'activeMachines',
+      render: (val) => <span className="font-mono font-bold text-midnight-900">{val ?? 0}</span>
+    },
+    {
+      header: 'Installed Capacity',
+      key: 'capacityMW',
+      render: (val) => <span className="font-mono">{formatMW(val)} MW</span>
+    },
+    {
+      header: 'Avg MW / Unit',
+      key: 'avgMW',
+      render: (val) => <span className="font-mono">{formatMW(val)} MW</span>
+    }
+  ];
+
+  const benchmarkUnits = (overview?.facilities || [])
+    .filter((facility) => facility.activeMachines > 0)
+    .sort((a, b) => (b.capacityMW || 0) - (a.capacityMW || 0))
+    .map((facility) => ({
+      id: facility.id,
+      name: facility.name,
+      fuel: facility.fuel,
+      activeMachines: facility.activeMachines,
+      capacityMW: facility.capacityMW,
+      avgMW:
+        facility.capacityMW && facility.activeMachines
+          ? facility.capacityMW / facility.activeMachines
+          : null
+    }));
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -142,6 +204,12 @@ export const MachineConsumption = () => {
           size="sm"
           onClick={() => setIsModalOpen(true)}
           leftIcon={Plus}
+          disabled={facilities.length === 0}
+          title={
+            facilities.length === 0
+              ? 'Register a facility in your organization before adding equipment'
+              : undefined
+          }
         >
           Add Machine Entry
         </Button>
@@ -158,9 +226,55 @@ export const MachineConsumption = () => {
         </div>
       </div>
 
+      {isBenchmark && (
+        <div className="rounded-xl border border-cobalt-200 bg-cobalt-50/60 p-4 flex items-start gap-3">
+          <Database className="w-4 h-4 text-cobalt-700 mt-0.5 shrink-0" />
+          <div className="space-y-1">
+            <p className="text-xs font-bold text-midnight-900">
+              CEA/NPP benchmark · generating units only
+            </p>
+            <p className="text-[11px] text-midnight-600 leading-relaxed">
+              The public dataset reports plant capacity and unit counts, not machine-level power draw or duty
+              hours. Add your own equipment below to calculate consumption from nameplate ratings.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {!isBenchmark && !loading && facilities.length === 0 && (
+        <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 flex items-start gap-3">
+          <Info className="w-4 h-4 text-amber-700 mt-0.5 shrink-0" />
+          <div className="space-y-1">
+            <p className="text-xs font-bold text-midnight-900">No registered facility available</p>
+            <p className="text-[11px] text-midnight-700 leading-relaxed">
+              Equipment must be linked to a facility in your organization. Register a facility first,
+              then return here to add machine duty cycles.
+            </p>
+          </div>
+        </div>
+      )}
+
       <Card title="Machinery Energy Consumption Register" subtitle="Configured production equipment and periodic loads">
-        <DataTable columns={columns} data={machines} isLoading={loading} />
+        <DataTable
+          columns={columns}
+          data={machines}
+          isLoading={loading}
+          emptyMessage={
+            isBenchmark
+              ? 'No machine records yet. Add your own equipment to calculate consumption; the benchmark below lists state generating units.'
+              : 'No machine records yet. Add equipment to calculate consumption from power rating and duty hours.'
+          }
+        />
       </Card>
+
+      {isBenchmark && (
+        <Card
+          title="Karnataka Generating Units (CEA/NPP Benchmark)"
+          subtitle="Installed capacity and unit counts by plant · FY 2023-24"
+        >
+          <DataTable columns={unitColumns} data={benchmarkUnits} isLoading={loading} />
+        </Card>
+      )}
 
       {/* Modal: Add Machine */}
       <Modal
@@ -185,11 +299,14 @@ export const MachineConsumption = () => {
               onChange={(e) => setCategory(e.target.value)}
               options={['Machining', 'Thermal', 'HVAC & Cooling', 'Pneumatics', 'Material Handling', 'Other']}
             />
-            <Input
-              label="Assigned Plant"
-              value={facility}
-              onChange={(e) => setFacility(e.target.value)}
-              placeholder="e.g. Plant A"
+            <Select
+              label="Assigned Facility"
+              value={facilityId}
+              onChange={(e) => setFacilityId(e.target.value)}
+              options={facilities.map((registered) => ({
+                value: registered.id,
+                label: registered.name
+              }))}
               required
             />
           </div>

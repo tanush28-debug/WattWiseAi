@@ -1,3 +1,11 @@
+import { toCsv } from '../utils/csv.js';
+
+const slugify = (value) =>
+  String(value || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_|_$/g, '');
+
 let localPolicies = [
   { id: 'pol-1', code: 'T-RES-LIFELINE-26', name: 'National Lifeline Domestic Tariff (<100 kWh)', tierLimitKWh: 100, ratePerKWh: 3.50, status: 'Active' },
   { id: 'pol-2', code: 'T-IND-TOD-HT', name: 'Industrial High-Tension ToD Incentive', peakSurcharge: '+20%', offPeakDiscount: '-15%', status: 'Active' },
@@ -110,10 +118,62 @@ export const governmentService = {
     };
   },
 
-  async generateReport(params) {
+  async generateReport(params = {}, user = null, scopedClient = null) {
+    const overview = await this.getOverview(user, scopedClient);
+    const generatedAt = new Date().toISOString();
+    const reportCategory = params.reportCategory || 'National Grid Energy Census';
+    const year = params.year || new Date().getUTCFullYear();
+
+    const rows = [
+      ['WattWise Government Energy Report'],
+      ['Report Category', reportCategory],
+      ['Reporting Year', year],
+      ['Generated At', generatedAt],
+      ['Reporting Period', overview.reportingPeriod],
+      ['National Consumption (TWh)', overview.nationalTotalConsumptionTWh],
+      ['National Emissions (MT CO2e)', overview.totalCarbonEmissionsMT],
+      ['Grid Reliability Index', overview.gridReliabilityIndex],
+      ['Clean Energy Ratio (%)', overview.cleanEnergyRatioPercent],
+      [],
+      [
+        'Region',
+        'Total Consumption (GWh)',
+        'Per Capita (kWh)',
+        'Renewable Share (%)',
+        'Compliance Rate (%)',
+      ],
+      ...overview.regionalData.map((region) => [
+        region.region,
+        region.totalGWh,
+        region.perCapitaKWh,
+        region.renewableShare,
+        region.complianceRate,
+      ]),
+      [],
+      ['Sector', 'Share (%)', 'TWh', 'Emissions (MT CO2e)', 'Growth Rate'],
+      ...overview.sectors.map((sector) => [
+        sector.name,
+        sector.sharePercent,
+        sector.twh,
+        sector.emissionsMT,
+        sector.growthRate,
+      ]),
+      [],
+      ['Active Tariff Policy', 'Code', 'Status'],
+      ...overview.activeTariffPolicies.map((policy) => [
+        policy.name,
+        policy.code,
+        policy.status,
+      ]),
+    ];
+
     return {
-      reportId: 'GOV-DOC-' + Math.floor(100000 + Math.random() * 900000),
-      fileName: `National_Energy_Strategy_Synthesis_${params.year || '2026'}.pdf`,
+      reportId: `GOV-DOC-${Date.now()}`,
+      fileName: `WattWise_Government_${slugify(reportCategory)}_${slugify(year)}.csv`,
+      mimeType: 'text/csv',
+      rowCount: overview.regionalData.length + overview.sectors.length,
+      generatedAt,
+      csvContent: toCsv(rows),
     };
   }
 };

@@ -29,8 +29,6 @@ export const TARIFF_CATEGORIES = [
   { id: 'agricultural-subsidized', name: 'Agricultural Feeder Subsidized (KUSUM)', baseRate: 2.10, peakRate: 3.40, standingCharge: 60.00 }
 ];
 
-export const DEMO_NOTICE_BANNER = "DEMO SIMULATION: Real backend calculations & ML forecasting will seamlessly stream once connected.";
-
 // Role-specific imagery for distinct visual atmospheres
 export const PORTAL_ASSETS = {
   CONSUMER: {

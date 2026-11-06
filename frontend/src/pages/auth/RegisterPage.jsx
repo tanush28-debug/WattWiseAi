@@ -66,7 +66,7 @@ export const RegisterPage = () => {
         navigate(`/login?role=${accountType}`);
       } else {
         toast.success(`Account registered! Welcome to WattWise AI, ${fullName}.`);
-        if (accountType === USER_ROLES.INDUSTRIAL) {
+        if (result.user.role === USER_ROLES.INDUSTRIAL) {
           navigate('/industrial');
         } else {
           navigate('/consumer');

@@ -1,8 +1,3 @@
-/**
- * Middleware: requireRole
- * Enforces role-based access control based on the verified role loaded by authMiddleware.
- * @param  {...string} allowedRoles - E.g. 'CONSUMER', 'INDUSTRIAL', 'GOVERNMENT_ADMIN'
- */
 export function requireRole(...allowedRoles) {
   return (req, res, next) => {
     if (!req.user) {
@@ -11,24 +6,12 @@ export function requireRole(...allowedRoles) {
         message: 'Authentication required before role verification.',
       });
     }
-
-    const userRole = req.user.role;
-
-    // Normalizing role naming (support both GOVERNMENT and GOVERNMENT_ADMIN)
-    const isPermitted = allowedRoles.some((role) => {
-      if (role === 'GOVERNMENT' && (userRole === 'GOVERNMENT' || userRole === 'GOVERNMENT_ADMIN')) return true;
-      if (role === 'GOVERNMENT_ADMIN' && (userRole === 'GOVERNMENT' || userRole === 'GOVERNMENT_ADMIN')) return true;
-      return userRole === role;
-    });
-
-    if (!isPermitted) {
+    if (!allowedRoles.includes(req.user.role)) {
       return res.status(403).json({
         success: false,
-        message: `Access denied. Authorized roles: [${allowedRoles.join(', ')}]. Your verified role: ${userRole}.`,
+        message: 'Access denied for this account.',
       });
     }
-
-    next();
+    return next();
   };
 }
-

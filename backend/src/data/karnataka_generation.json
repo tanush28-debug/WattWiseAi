@@ -1,0 +1,1780 @@
+{
+  "source": "CEA/NPP station-wise generation, compiled by CHETNA (Zenodo)",
+  "sourceUrl": "https://zenodo.org/records/21865308",
+  "license": "CC BY 4.0",
+  "state": "Karnataka",
+  "latestFiscalYear": "2023-24",
+  "previousFiscalYear": "2022-23",
+  "generatedAt": "2026-11-06",
+  "facilities": [
+    {
+      "name": "KUDGI STPP",
+      "fuel": "COAL",
+      "capacityMW": 2400.0,
+      "generationMWh": 11342000.0,
+      "co2Tonnes": 9891152.68,
+      "latitude": 16.499546,
+      "longitude": 75.834632,
+      "loadFactorPercent": 53.95,
+      "yoyChangePercent": 6.54,
+      "status": "Operating",
+      "unitCount": 3
+    },
+    {
+      "name": "BELLARY TPS",
+      "fuel": "COAL",
+      "capacityMW": 1700.0,
+      "generationMWh": 7630600.0,
+      "co2Tonnes": 8217518.41,
+      "latitude": 15.1931738,
+      "longitude": 76.7195034,
+      "loadFactorPercent": 51.24,
+      "yoyChangePercent": 16.2,
+      "status": "Operating",
+      "unitCount": 3
+    },
+    {
+      "name": "RAICHUR TPS",
+      "fuel": "COAL",
+      "capacityMW": 1720.0,
+      "generationMWh": 7002970.0,
+      "co2Tonnes": 8283471.14,
+      "latitude": 16.3532,
+      "longitude": 77.3422,
+      "loadFactorPercent": 46.48,
+      "yoyChangePercent": 19.97,
+      "status": "Operating",
+      "unitCount": 8
+    },
+    {
+      "name": "KAIGA",
+      "fuel": "NUCLEAR",
+      "capacityMW": 880.0,
+      "generationMWh": 6714870.0,
+      "co2Tonnes": 0.0,
+      "latitude": 14.669342,
+      "longitude": 74.309005,
+      "loadFactorPercent": 87.11,
+      "yoyChangePercent": 0.8,
+      "status": "Operating",
+      "unitCount": 4
+    },
+    {
+      "name": "YERMARUS TPP",
+      "fuel": "COAL",
+      "capacityMW": 1600.0,
+      "generationMWh": 5721980.0,
+      "co2Tonnes": 5438254.84,
+      "latitude": 16.295261,
+      "longitude": 77.35612,
+      "loadFactorPercent": 40.82,
+      "yoyChangePercent": 31.01,
+      "status": "Operating",
+      "unitCount": 2
+    },
+    {
+      "name": "UDUPI TPP",
+      "fuel": "COAL",
+      "capacityMW": 1200.0,
+      "generationMWh": 5276740.0,
+      "co2Tonnes": 4736228.62,
+      "latitude": 13.1596,
+      "longitude": 74.8002,
+      "loadFactorPercent": 50.2,
+      "yoyChangePercent": 315.65,
+      "status": "Operating",
+      "unitCount": 2
+    },
+    {
+      "name": "SHARAVATHI HPS",
+      "fuel": "HYDRO",
+      "capacityMW": 1035.0,
+      "generationMWh": 3341460.0,
+      "co2Tonnes": 0.0,
+      "latitude": 14.2352,
+      "longitude": 74.7673,
+      "loadFactorPercent": 36.85,
+      "yoyChangePercent": -35.68,
+      "status": "Operating",
+      "unitCount": 1
+    },
+    {
+      "name": "KALINADI HPS",
+      "fuel": "HYDRO",
+      "capacityMW": 900.0,
+      "generationMWh": 2523640.0,
+      "co2Tonnes": 0.0,
+      "latitude": 14.95503,
+      "longitude": 74.590444,
+      "loadFactorPercent": 32.01,
+      "yoyChangePercent": -10.8,
+      "status": "Operating",
+      "unitCount": 1
+    },
+    {
+      "name": "TORANGALLU TPS(SBU-II)",
+      "fuel": "COAL",
+      "capacityMW": 600.0,
+      "generationMWh": 2480790.0,
+      "co2Tonnes": 2100717.25,
+      "latitude": 15.186771,
+      "longitude": 76.6621387,
+      "loadFactorPercent": 47.2,
+      "yoyChangePercent": 33.52,
+      "status": "Operating",
+      "unitCount": 2
+    },
+    {
+      "name": "TORANGALLU TPS(SBU-I)",
+      "fuel": "COAL",
+      "capacityMW": 260.0,
+      "generationMWh": 1586280.0,
+      "co2Tonnes": 1150392.53,
+      "latitude": 15.186771,
+      "longitude": 76.6621387,
+      "loadFactorPercent": 69.65,
+      "yoyChangePercent": -6.25,
+      "status": "Operating",
+      "unitCount": 2
+    },
+    {
+      "name": "VARAHI HPS",
+      "fuel": "HYDRO",
+      "capacityMW": 460.0,
+      "generationMWh": 644630.0,
+      "co2Tonnes": 0.0,
+      "latitude": 13.659201,
+      "longitude": 74.956029,
+      "loadFactorPercent": 16.0,
+      "yoyChangePercent": -47.38,
+      "status": "Operating",
+      "unitCount": 1
+    },
+    {
+      "name": "KALINADI SUPA HPS",
+      "fuel": "HYDRO",
+      "capacityMW": 100.0,
+      "generationMWh": 423580.0,
+      "co2Tonnes": 0.0,
+      "latitude": 15.2761,
+      "longitude": 74.5268,
+      "loadFactorPercent": 48.35,
+      "yoyChangePercent": 12.93,
+      "status": "Operating",
+      "unitCount": 1
+    },
+    {
+      "name": "JOG HPS",
+      "fuel": "HYDRO",
+      "capacityMW": 139.0,
+      "generationMWh": 341020.0,
+      "co2Tonnes": 0.0,
+      "latitude": 14.229506,
+      "longitude": 74.812657,
+      "loadFactorPercent": 28.01,
+      "yoyChangePercent": -37.8,
+      "status": "Operating",
+      "unitCount": 1
+    },
+    {
+      "name": "KODASALI HPS",
+      "fuel": "HYDRO",
+      "capacityMW": 120.0,
+      "generationMWh": 281700.0,
+      "co2Tonnes": 0.0,
+      "latitude": 14.920447,
+      "longitude": 74.534997,
+      "loadFactorPercent": 26.8,
+      "yoyChangePercent": -18.0,
+      "status": "Operating",
+      "unitCount": 1
+    },
+    {
+      "name": "KADRA HPS",
+      "fuel": "HYDRO",
+      "capacityMW": 150.0,
+      "generationMWh": 277360.0,
+      "co2Tonnes": 0.0,
+      "latitude": 14.896765,
+      "longitude": 74.354388,
+      "loadFactorPercent": 21.11,
+      "yoyChangePercent": -21.64,
+      "status": "Operating",
+      "unitCount": 1
+    },
+    {
+      "name": "ALMATTI DPH HPS",
+      "fuel": "HYDRO",
+      "capacityMW": 290.0,
+      "generationMWh": 240850.0,
+      "co2Tonnes": 0.0,
+      "latitude": 16.331062,
+      "longitude": 75.888343,
+      "loadFactorPercent": 9.48,
+      "yoyChangePercent": -61.37,
+      "status": "Operating",
+      "unitCount": 1
+    },
+    {
+      "name": "SIVASAMUNDRUM HPS",
+      "fuel": "HYDRO",
+      "capacityMW": 42.0,
+      "generationMWh": 159740.0,
+      "co2Tonnes": 0.0,
+      "latitude": 12.29866,
+      "longitude": 77.171557,
+      "loadFactorPercent": 43.42,
+      "yoyChangePercent": -43.85,
+      "status": "Operating",
+      "unitCount": 1
+    },
+    {
+      "name": "LIGANAMAKKI HPS",
+      "fuel": "HYDRO",
+      "capacityMW": 55.0,
+      "generationMWh": 149320.0,
+      "co2Tonnes": 0.0,
+      "latitude": 14.176729,
+      "longitude": 74.850336,
+      "loadFactorPercent": 30.99,
+      "yoyChangePercent": -40.97,
+      "status": "Operating",
+      "unitCount": 1
+    },
+    {
+      "name": "HAMPI HPS",
+      "fuel": "HYDRO",
+      "capacityMW": 36.0,
+      "generationMWh": 64950.0,
+      "co2Tonnes": 0.0,
+      "latitude": 15.312089,
+      "longitude": 76.528886,
+      "loadFactorPercent": 20.6,
+      "yoyChangePercent": -37.69,
+      "status": "Operating",
+      "unitCount": 1
+    },
+    {
+      "name": "GHAT PRABHA HPS",
+      "fuel": "HYDRO",
+      "capacityMW": 32.0,
+      "generationMWh": 42530.0,
+      "co2Tonnes": 0.0,
+      "latitude": 16.1424,
+      "longitude": 74.6447,
+      "loadFactorPercent": 15.17,
+      "yoyChangePercent": -50.99,
+      "status": "Operating",
+      "unitCount": 1
+    },
+    {
+      "name": "T B DAM HPS",
+      "fuel": "HYDRO",
+      "capacityMW": 36.0,
+      "generationMWh": 33320.0,
+      "co2Tonnes": 0.0,
+      "latitude": 15.261329,
+      "longitude": 76.338291,
+      "loadFactorPercent": 10.57,
+      "yoyChangePercent": -62.18,
+      "status": "Operating",
+      "unitCount": 1
+    },
+    {
+      "name": "MUNIRABAD HPS",
+      "fuel": "HYDRO",
+      "capacityMW": 28.0,
+      "generationMWh": 31490.0,
+      "co2Tonnes": 0.0,
+      "latitude": 15.266677,
+      "longitude": 76.32939,
+      "loadFactorPercent": 12.84,
+      "yoyChangePercent": -72.47,
+      "status": "Operating",
+      "unitCount": 1
+    },
+    {
+      "name": "BHADRA HPS",
+      "fuel": "HYDRO",
+      "capacityMW": 26.0,
+      "generationMWh": 26600.0,
+      "co2Tonnes": 0.0,
+      "latitude": 13.700031,
+      "longitude": 75.640161,
+      "loadFactorPercent": 11.68,
+      "yoyChangePercent": -74.47,
+      "status": "Operating",
+      "unitCount": 1
+    }
+  ],
+  "annualTrend": [
+    {
+      "fiscalYear": "2018-19",
+      "generationMWh": 42567720.0
+    },
+    {
+      "fiscalYear": "2019-20",
+      "generationMWh": 39753670.0
+    },
+    {
+      "fiscalYear": "2020-21",
+      "generationMWh": 34906690.0
+    },
+    {
+      "fiscalYear": "2021-22",
+      "generationMWh": 44623410.0
+    },
+    {
+      "fiscalYear": "2022-23",
+      "generationMWh": 51427320.0
+    },
+    {
+      "fiscalYear": "2023-24",
+      "generationMWh": 56338420.0
+    }
+  ],
+  "recentAnomalies": [
+    {
+      "id": "cea-sharavathi-hps",
+      "facilityName": "SHARAVATHI HPS",
+      "equipment": "Plant generation",
+      "detectedAt": "FY 2023-24",
+      "severity": "MEDIUM",
+      "deviation": "-35.7% vs FY 2022-23",
+      "explanation": "SHARAVATHI HPS generated 3,341,460 MWh in FY 2023-24, a 35.7% change from FY 2022-23.",
+      "recommendedAction": "Review outage schedule, fuel supply and station dispatch data for this plant."
+    },
+    {
+      "id": "cea-varahi-hps",
+      "facilityName": "VARAHI HPS",
+      "equipment": "Plant generation",
+      "detectedAt": "FY 2023-24",
+      "severity": "HIGH",
+      "deviation": "-47.4% vs FY 2022-23",
+      "explanation": "VARAHI HPS generated 644,630 MWh in FY 2023-24, a 47.4% change from FY 2022-23.",
+      "recommendedAction": "Review outage schedule, fuel supply and station dispatch data for this plant."
+    },
+    {
+      "id": "cea-jog-hps",
+      "facilityName": "JOG HPS",
+      "equipment": "Plant generation",
+      "detectedAt": "FY 2023-24",
+      "severity": "MEDIUM",
+      "deviation": "-37.8% vs FY 2022-23",
+      "explanation": "JOG HPS generated 341,020 MWh in FY 2023-24, a 37.8% change from FY 2022-23.",
+      "recommendedAction": "Review outage schedule, fuel supply and station dispatch data for this plant."
+    },
+    {
+      "id": "cea-kadra-hps",
+      "facilityName": "KADRA HPS",
+      "equipment": "Plant generation",
+      "detectedAt": "FY 2023-24",
+      "severity": "MEDIUM",
+      "deviation": "-21.6% vs FY 2022-23",
+      "explanation": "KADRA HPS generated 277,360 MWh in FY 2023-24, a 21.6% change from FY 2022-23.",
+      "recommendedAction": "Review outage schedule, fuel supply and station dispatch data for this plant."
+    },
+    {
+      "id": "cea-almatti-dph-hps",
+      "facilityName": "ALMATTI DPH HPS",
+      "equipment": "Plant generation",
+      "detectedAt": "FY 2023-24",
+      "severity": "HIGH",
+      "deviation": "-61.4% vs FY 2022-23",
+      "explanation": "ALMATTI DPH HPS generated 240,850 MWh in FY 2023-24, a 61.4% change from FY 2022-23.",
+      "recommendedAction": "Review outage schedule, fuel supply and station dispatch data for this plant."
+    },
+    {
+      "id": "cea-sivasamundrum-hps",
+      "facilityName": "SIVASAMUNDRUM HPS",
+      "equipment": "Plant generation",
+      "detectedAt": "FY 2023-24",
+      "severity": "HIGH",
+      "deviation": "-43.9% vs FY 2022-23",
+      "explanation": "SIVASAMUNDRUM HPS generated 159,740 MWh in FY 2023-24, a 43.9% change from FY 2022-23.",
+      "recommendedAction": "Review outage schedule, fuel supply and station dispatch data for this plant."
+    }
+  ],
+  "plantYears": [
+    {
+      "fiscalYear": "2018-19",
+      "plantName": "BELLARY TPS",
+      "generationMWh": 315010.0,
+      "co2Tonnes": 3619255.9,
+      "capacityMW": 1700.0,
+      "fuel": "COAL",
+      "latitude": 15.1931738,
+      "longitude": 76.7195034
+    },
+    {
+      "fiscalYear": "2018-19",
+      "plantName": "KUDGI STPP",
+      "generationMWh": 6969990.0,
+      "co2Tonnes": 6018284.25,
+      "capacityMW": 2400.0,
+      "fuel": "COAL",
+      "latitude": 16.499546,
+      "longitude": 75.834632
+    },
+    {
+      "fiscalYear": "2018-19",
+      "plantName": "RAICHUR TPS",
+      "generationMWh": 8065380.0,
+      "co2Tonnes": 16339284.87,
+      "capacityMW": 3440.0,
+      "fuel": "COAL",
+      "latitude": 16.350102,
+      "longitude": 77.342876
+    },
+    {
+      "fiscalYear": "2018-19",
+      "plantName": "TORANGALLU TPS(SBU-I)",
+      "generationMWh": 1221500.0,
+      "co2Tonnes": 1958937.87,
+      "capacityMW": 520.0,
+      "fuel": "COAL",
+      "latitude": 15.18134,
+      "longitude": 76.659328
+    },
+    {
+      "fiscalYear": "2018-19",
+      "plantName": "TORANGALLU TPS(SBU-II)",
+      "generationMWh": 2289490.0,
+      "co2Tonnes": 4267439.63,
+      "capacityMW": 1200.0,
+      "fuel": "COAL",
+      "latitude": 15.200065,
+      "longitude": 76.728679
+    },
+    {
+      "fiscalYear": "2018-19",
+      "plantName": "UDUPI TPP",
+      "generationMWh": 4883790.0,
+      "co2Tonnes": 9169556.04,
+      "capacityMW": 2400.0,
+      "fuel": "COAL",
+      "latitude": 13.160568,
+      "longitude": 74.803839
+    },
+    {
+      "fiscalYear": "2018-19",
+      "plantName": "YERMARUS TPP",
+      "generationMWh": 686500.0,
+      "co2Tonnes": 703023.96,
+      "capacityMW": 1600.0,
+      "fuel": "COAL",
+      "latitude": 16.295261,
+      "longitude": 77.35612
+    },
+    {
+      "fiscalYear": "2018-19",
+      "plantName": "ALMATTI DPH HPS",
+      "generationMWh": 406380.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 290.0,
+      "fuel": "HYDRO",
+      "latitude": 16.331062,
+      "longitude": 75.888343
+    },
+    {
+      "fiscalYear": "2018-19",
+      "plantName": "BHADRA HPS",
+      "generationMWh": 54930.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 26.0,
+      "fuel": "HYDRO",
+      "latitude": 13.700031,
+      "longitude": 75.640161
+    },
+    {
+      "fiscalYear": "2018-19",
+      "plantName": "GHAT PRABHA HPS",
+      "generationMWh": 80270.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 32.0,
+      "fuel": "HYDRO",
+      "latitude": 16.1424,
+      "longitude": 74.6447
+    },
+    {
+      "fiscalYear": "2018-19",
+      "plantName": "HAMPI HPS",
+      "generationMWh": 19110.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 36.0,
+      "fuel": "HYDRO",
+      "latitude": 15.312089,
+      "longitude": 76.528886
+    },
+    {
+      "fiscalYear": "2018-19",
+      "plantName": "JOG HPS",
+      "generationMWh": 193470.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 139.0,
+      "fuel": "HYDRO",
+      "latitude": 14.229506,
+      "longitude": 74.812657
+    },
+    {
+      "fiscalYear": "2018-19",
+      "plantName": "KADRA HPS",
+      "generationMWh": 373970.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 150.0,
+      "fuel": "HYDRO",
+      "latitude": 14.896765,
+      "longitude": 74.354388
+    },
+    {
+      "fiscalYear": "2018-19",
+      "plantName": "KAIGA",
+      "generationMWh": 6532350.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 1760.0,
+      "fuel": "NUCLEAR",
+      "latitude": 14.669342,
+      "longitude": 74.309005
+    },
+    {
+      "fiscalYear": "2018-19",
+      "plantName": "KALINADI HPS",
+      "generationMWh": 2763960.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 855.0,
+      "fuel": "HYDRO",
+      "latitude": 14.95503,
+      "longitude": 74.590444
+    },
+    {
+      "fiscalYear": "2018-19",
+      "plantName": "KALINADI SUPA HPS",
+      "generationMWh": 593180.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 100.0,
+      "fuel": "HYDRO",
+      "latitude": 15.2761,
+      "longitude": 74.5268
+    },
+    {
+      "fiscalYear": "2018-19",
+      "plantName": "KODASALI HPS",
+      "generationMWh": 343830.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 120.0,
+      "fuel": "HYDRO",
+      "latitude": 14.920447,
+      "longitude": 74.534997
+    },
+    {
+      "fiscalYear": "2018-19",
+      "plantName": "LIGANAMAKKI HPS",
+      "generationMWh": 251270.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 55.0,
+      "fuel": "HYDRO",
+      "latitude": 14.176729,
+      "longitude": 74.850336
+    },
+    {
+      "fiscalYear": "2018-19",
+      "plantName": "MUNIRABAD HPS",
+      "generationMWh": 88970.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 28.0,
+      "fuel": "HYDRO",
+      "latitude": 15.266677,
+      "longitude": 76.32939
+    },
+    {
+      "fiscalYear": "2018-19",
+      "plantName": "SHARAVATHI HPS",
+      "generationMWh": 4762250.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 1035.0,
+      "fuel": "HYDRO",
+      "latitude": 14.2352,
+      "longitude": 74.7673
+    },
+    {
+      "fiscalYear": "2018-19",
+      "plantName": "SIVASAMUNDRUM HPS",
+      "generationMWh": 282770.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 42.0,
+      "fuel": "HYDRO",
+      "latitude": 12.29866,
+      "longitude": 77.171557
+    },
+    {
+      "fiscalYear": "2018-19",
+      "plantName": "T B DAM HPS",
+      "generationMWh": 151780.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 36.0,
+      "fuel": "HYDRO",
+      "latitude": 15.261329,
+      "longitude": 76.338291
+    },
+    {
+      "fiscalYear": "2018-19",
+      "plantName": "VARAHI HPS",
+      "generationMWh": 1237570.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 460.0,
+      "fuel": "HYDRO",
+      "latitude": 13.659201,
+      "longitude": 74.956029
+    },
+    {
+      "fiscalYear": "2019-20",
+      "plantName": "BELLARY TPS",
+      "generationMWh": 1657160.0,
+      "co2Tonnes": 3682767.8,
+      "capacityMW": 1700.0,
+      "fuel": "COAL",
+      "latitude": 15.1931738,
+      "longitude": 76.7195034
+    },
+    {
+      "fiscalYear": "2019-20",
+      "plantName": "KUDGI STPP",
+      "generationMWh": 4226370.0,
+      "co2Tonnes": 3890988.45,
+      "capacityMW": 2400.0,
+      "fuel": "COAL",
+      "latitude": 16.499546,
+      "longitude": 75.834632
+    },
+    {
+      "fiscalYear": "2019-20",
+      "plantName": "RAICHUR TPS",
+      "generationMWh": 7688830.0,
+      "co2Tonnes": 15003184.7,
+      "capacityMW": 3440.0,
+      "fuel": "COAL",
+      "latitude": 16.350102,
+      "longitude": 77.342876
+    },
+    {
+      "fiscalYear": "2019-20",
+      "plantName": "TORANGALLU TPS(SBU-I)",
+      "generationMWh": 1044400.0,
+      "co2Tonnes": 1434380.13,
+      "capacityMW": 520.0,
+      "fuel": "COAL",
+      "latitude": 15.18134,
+      "longitude": 76.659328
+    },
+    {
+      "fiscalYear": "2019-20",
+      "plantName": "TORANGALLU TPS(SBU-II)",
+      "generationMWh": 1713520.0,
+      "co2Tonnes": 3035251.13,
+      "capacityMW": 1200.0,
+      "fuel": "COAL",
+      "latitude": 15.200065,
+      "longitude": 76.728679
+    },
+    {
+      "fiscalYear": "2019-20",
+      "plantName": "UDUPI TPP",
+      "generationMWh": 3029140.0,
+      "co2Tonnes": 5788160.64,
+      "capacityMW": 2400.0,
+      "fuel": "COAL",
+      "latitude": 13.160568,
+      "longitude": 74.803839
+    },
+    {
+      "fiscalYear": "2019-20",
+      "plantName": "YERMARUS TPP",
+      "generationMWh": 442510.0,
+      "co2Tonnes": 406855.08,
+      "capacityMW": 1600.0,
+      "fuel": "COAL",
+      "latitude": 16.295261,
+      "longitude": 77.35612
+    },
+    {
+      "fiscalYear": "2019-20",
+      "plantName": "ALMATTI DPH HPS",
+      "generationMWh": 629300.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 290.0,
+      "fuel": "HYDRO",
+      "latitude": 16.331062,
+      "longitude": 75.888343
+    },
+    {
+      "fiscalYear": "2019-20",
+      "plantName": "BHADRA HPS",
+      "generationMWh": 74360.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 26.0,
+      "fuel": "HYDRO",
+      "latitude": 13.700031,
+      "longitude": 75.640161
+    },
+    {
+      "fiscalYear": "2019-20",
+      "plantName": "GHAT PRABHA HPS",
+      "generationMWh": 50390.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 32.0,
+      "fuel": "HYDRO",
+      "latitude": 16.1424,
+      "longitude": 74.6447
+    },
+    {
+      "fiscalYear": "2019-20",
+      "plantName": "HAMPI HPS",
+      "generationMWh": 93030.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 36.0,
+      "fuel": "HYDRO",
+      "latitude": 15.312089,
+      "longitude": 76.528886
+    },
+    {
+      "fiscalYear": "2019-20",
+      "plantName": "JOG HPS",
+      "generationMWh": 296740.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 139.0,
+      "fuel": "HYDRO",
+      "latitude": 14.229506,
+      "longitude": 74.812657
+    },
+    {
+      "fiscalYear": "2019-20",
+      "plantName": "KADRA HPS",
+      "generationMWh": 473120.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 150.0,
+      "fuel": "HYDRO",
+      "latitude": 14.896765,
+      "longitude": 74.354388
+    },
+    {
+      "fiscalYear": "2019-20",
+      "plantName": "KAIGA",
+      "generationMWh": 6580000.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 1760.0,
+      "fuel": "NUCLEAR",
+      "latitude": 14.669342,
+      "longitude": 74.309005
+    },
+    {
+      "fiscalYear": "2019-20",
+      "plantName": "KALINADI HPS",
+      "generationMWh": 3647780.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 855.0,
+      "fuel": "HYDRO",
+      "latitude": 14.95503,
+      "longitude": 74.590444
+    },
+    {
+      "fiscalYear": "2019-20",
+      "plantName": "KALINADI SUPA HPS",
+      "generationMWh": 581230.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 100.0,
+      "fuel": "HYDRO",
+      "latitude": 15.2761,
+      "longitude": 74.5268
+    },
+    {
+      "fiscalYear": "2019-20",
+      "plantName": "KODASALI HPS",
+      "generationMWh": 471250.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 120.0,
+      "fuel": "HYDRO",
+      "latitude": 14.920447,
+      "longitude": 74.534997
+    },
+    {
+      "fiscalYear": "2019-20",
+      "plantName": "LIGANAMAKKI HPS",
+      "generationMWh": 297090.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 55.0,
+      "fuel": "HYDRO",
+      "latitude": 14.176729,
+      "longitude": 74.850336
+    },
+    {
+      "fiscalYear": "2019-20",
+      "plantName": "MUNIRABAD HPS",
+      "generationMWh": 79290.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 28.0,
+      "fuel": "HYDRO",
+      "latitude": 15.266677,
+      "longitude": 76.32939
+    },
+    {
+      "fiscalYear": "2019-20",
+      "plantName": "SHARAVATHI HPS",
+      "generationMWh": 5110780.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 1035.0,
+      "fuel": "HYDRO",
+      "latitude": 14.2352,
+      "longitude": 74.7673
+    },
+    {
+      "fiscalYear": "2019-20",
+      "plantName": "SIVASAMUNDRUM HPS",
+      "generationMWh": 258680.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 42.0,
+      "fuel": "HYDRO",
+      "latitude": 12.29866,
+      "longitude": 77.171557
+    },
+    {
+      "fiscalYear": "2019-20",
+      "plantName": "T B DAM HPS",
+      "generationMWh": 130980.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 36.0,
+      "fuel": "HYDRO",
+      "latitude": 15.261329,
+      "longitude": 76.338291
+    },
+    {
+      "fiscalYear": "2019-20",
+      "plantName": "VARAHI HPS",
+      "generationMWh": 1177720.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 460.0,
+      "fuel": "HYDRO",
+      "latitude": 13.659201,
+      "longitude": 74.956029
+    },
+    {
+      "fiscalYear": "2020-21",
+      "plantName": "BELLARY TPS",
+      "generationMWh": 1106490.0,
+      "co2Tonnes": 2696806.85,
+      "capacityMW": 1700.0,
+      "fuel": "COAL",
+      "latitude": 15.1931738,
+      "longitude": 76.7195034
+    },
+    {
+      "fiscalYear": "2020-21",
+      "plantName": "KUDGI STPP",
+      "generationMWh": 4369950.0,
+      "co2Tonnes": 3709288.02,
+      "capacityMW": 2400.0,
+      "fuel": "COAL",
+      "latitude": 16.499546,
+      "longitude": 75.834632
+    },
+    {
+      "fiscalYear": "2020-21",
+      "plantName": "RAICHUR TPS",
+      "generationMWh": 3500640.0,
+      "co2Tonnes": 5879071.91,
+      "capacityMW": 3440.0,
+      "fuel": "COAL",
+      "latitude": 16.350102,
+      "longitude": 77.342876
+    },
+    {
+      "fiscalYear": "2020-21",
+      "plantName": "TORANGALLU TPS(SBU-I)",
+      "generationMWh": 927180.0,
+      "co2Tonnes": 985651.87,
+      "capacityMW": 520.0,
+      "fuel": "COAL",
+      "latitude": 15.18134,
+      "longitude": 76.659328
+    },
+    {
+      "fiscalYear": "2020-21",
+      "plantName": "TORANGALLU TPS(SBU-II)",
+      "generationMWh": 1274540.0,
+      "co2Tonnes": 2217873.87,
+      "capacityMW": 1200.0,
+      "fuel": "COAL",
+      "latitude": 15.200065,
+      "longitude": 76.728679
+    },
+    {
+      "fiscalYear": "2020-21",
+      "plantName": "UDUPI TPP",
+      "generationMWh": 2156460.0,
+      "co2Tonnes": 3899822.05,
+      "capacityMW": 2400.0,
+      "fuel": "COAL",
+      "latitude": 13.160568,
+      "longitude": 74.803839
+    },
+    {
+      "fiscalYear": "2020-21",
+      "plantName": "YERMARUS TPP",
+      "generationMWh": 3129460.0,
+      "co2Tonnes": 2917324.08,
+      "capacityMW": 1600.0,
+      "fuel": "COAL",
+      "latitude": 16.295261,
+      "longitude": 77.35612
+    },
+    {
+      "fiscalYear": "2020-21",
+      "plantName": "ALMATTI DPH HPS",
+      "generationMWh": 641440.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 290.0,
+      "fuel": "HYDRO",
+      "latitude": 16.331062,
+      "longitude": 75.888343
+    },
+    {
+      "fiscalYear": "2020-21",
+      "plantName": "BHADRA HPS",
+      "generationMWh": 56460.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 26.0,
+      "fuel": "HYDRO",
+      "latitude": 13.700031,
+      "longitude": 75.640161
+    },
+    {
+      "fiscalYear": "2020-21",
+      "plantName": "GHAT PRABHA HPS",
+      "generationMWh": 109490.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 32.0,
+      "fuel": "HYDRO",
+      "latitude": 16.1424,
+      "longitude": 74.6447
+    },
+    {
+      "fiscalYear": "2020-21",
+      "plantName": "HAMPI HPS",
+      "generationMWh": 59870.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 36.0,
+      "fuel": "HYDRO",
+      "latitude": 15.312089,
+      "longitude": 76.528886
+    },
+    {
+      "fiscalYear": "2020-21",
+      "plantName": "JOG HPS",
+      "generationMWh": 371770.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 139.0,
+      "fuel": "HYDRO",
+      "latitude": 14.229506,
+      "longitude": 74.812657
+    },
+    {
+      "fiscalYear": "2020-21",
+      "plantName": "KADRA HPS",
+      "generationMWh": 407810.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 150.0,
+      "fuel": "HYDRO",
+      "latitude": 14.896765,
+      "longitude": 74.354388
+    },
+    {
+      "fiscalYear": "2020-21",
+      "plantName": "KAIGA",
+      "generationMWh": 6403000.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 1760.0,
+      "fuel": "NUCLEAR",
+      "latitude": 14.669342,
+      "longitude": 74.309005
+    },
+    {
+      "fiscalYear": "2020-21",
+      "plantName": "KALINADI HPS",
+      "generationMWh": 3129010.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 855.0,
+      "fuel": "HYDRO",
+      "latitude": 14.95503,
+      "longitude": 74.590444
+    },
+    {
+      "fiscalYear": "2020-21",
+      "plantName": "KALINADI SUPA HPS",
+      "generationMWh": 437450.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 100.0,
+      "fuel": "HYDRO",
+      "latitude": 15.2761,
+      "longitude": 74.5268
+    },
+    {
+      "fiscalYear": "2020-21",
+      "plantName": "KODASALI HPS",
+      "generationMWh": 380660.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 120.0,
+      "fuel": "HYDRO",
+      "latitude": 14.920447,
+      "longitude": 74.534997
+    },
+    {
+      "fiscalYear": "2020-21",
+      "plantName": "LIGANAMAKKI HPS",
+      "generationMWh": 253950.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 55.0,
+      "fuel": "HYDRO",
+      "latitude": 14.176729,
+      "longitude": 74.850336
+    },
+    {
+      "fiscalYear": "2020-21",
+      "plantName": "MUNIRABAD HPS",
+      "generationMWh": 101580.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 28.0,
+      "fuel": "HYDRO",
+      "latitude": 15.266677,
+      "longitude": 76.32939
+    },
+    {
+      "fiscalYear": "2020-21",
+      "plantName": "SHARAVATHI HPS",
+      "generationMWh": 4559890.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 1035.0,
+      "fuel": "HYDRO",
+      "latitude": 14.2352,
+      "longitude": 74.7673
+    },
+    {
+      "fiscalYear": "2020-21",
+      "plantName": "SIVASAMUNDRUM HPS",
+      "generationMWh": 319340.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 42.0,
+      "fuel": "HYDRO",
+      "latitude": 12.29866,
+      "longitude": 77.171557
+    },
+    {
+      "fiscalYear": "2020-21",
+      "plantName": "T B DAM HPS",
+      "generationMWh": 122530.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 36.0,
+      "fuel": "HYDRO",
+      "latitude": 15.261329,
+      "longitude": 76.338291
+    },
+    {
+      "fiscalYear": "2020-21",
+      "plantName": "VARAHI HPS",
+      "generationMWh": 1087720.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 460.0,
+      "fuel": "HYDRO",
+      "latitude": 13.659201,
+      "longitude": 74.956029
+    },
+    {
+      "fiscalYear": "2021-22",
+      "plantName": "BELLARY TPS",
+      "generationMWh": 2593350.0,
+      "co2Tonnes": 5875709.49,
+      "capacityMW": 1700.0,
+      "fuel": "COAL",
+      "latitude": 15.1931738,
+      "longitude": 76.7195034
+    },
+    {
+      "fiscalYear": "2021-22",
+      "plantName": "KUDGI STPP",
+      "generationMWh": 6258180.0,
+      "co2Tonnes": 5337774.84,
+      "capacityMW": 2400.0,
+      "fuel": "COAL",
+      "latitude": 16.499546,
+      "longitude": 75.834632
+    },
+    {
+      "fiscalYear": "2021-22",
+      "plantName": "RAICHUR TPS",
+      "generationMWh": 5981330.0,
+      "co2Tonnes": 11837708.01,
+      "capacityMW": 3440.0,
+      "fuel": "COAL",
+      "latitude": 16.350102,
+      "longitude": 77.342876
+    },
+    {
+      "fiscalYear": "2021-22",
+      "plantName": "TORANGALLU TPS(SBU-I)",
+      "generationMWh": 1319810.0,
+      "co2Tonnes": 1895526.73,
+      "capacityMW": 520.0,
+      "fuel": "COAL",
+      "latitude": 15.18134,
+      "longitude": 76.659328
+    },
+    {
+      "fiscalYear": "2021-22",
+      "plantName": "TORANGALLU TPS(SBU-II)",
+      "generationMWh": 1794690.0,
+      "co2Tonnes": 3214951.03,
+      "capacityMW": 1200.0,
+      "fuel": "COAL",
+      "latitude": 15.200065,
+      "longitude": 76.728679
+    },
+    {
+      "fiscalYear": "2021-22",
+      "plantName": "UDUPI TPP",
+      "generationMWh": 1558430.0,
+      "co2Tonnes": 3004313.44,
+      "capacityMW": 2400.0,
+      "fuel": "COAL",
+      "latitude": 13.160568,
+      "longitude": 74.803839
+    },
+    {
+      "fiscalYear": "2021-22",
+      "plantName": "YERMARUS TPP",
+      "generationMWh": 5010700.0,
+      "co2Tonnes": 4440976.19,
+      "capacityMW": 1600.0,
+      "fuel": "COAL",
+      "latitude": 16.295261,
+      "longitude": 77.35612
+    },
+    {
+      "fiscalYear": "2021-22",
+      "plantName": "ALMATTI DPH HPS",
+      "generationMWh": 497080.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 290.0,
+      "fuel": "HYDRO",
+      "latitude": 16.331062,
+      "longitude": 75.888343
+    },
+    {
+      "fiscalYear": "2021-22",
+      "plantName": "BHADRA HPS",
+      "generationMWh": 71940.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 26.0,
+      "fuel": "HYDRO",
+      "latitude": 13.700031,
+      "longitude": 75.640161
+    },
+    {
+      "fiscalYear": "2021-22",
+      "plantName": "GHAT PRABHA HPS",
+      "generationMWh": 94500.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 32.0,
+      "fuel": "HYDRO",
+      "latitude": 16.1424,
+      "longitude": 74.6447
+    },
+    {
+      "fiscalYear": "2021-22",
+      "plantName": "HAMPI HPS",
+      "generationMWh": 102480.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 36.0,
+      "fuel": "HYDRO",
+      "latitude": 15.312089,
+      "longitude": 76.528886
+    },
+    {
+      "fiscalYear": "2021-22",
+      "plantName": "JOG HPS",
+      "generationMWh": 551560.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 139.0,
+      "fuel": "HYDRO",
+      "latitude": 14.229506,
+      "longitude": 74.812657
+    },
+    {
+      "fiscalYear": "2021-22",
+      "plantName": "KADRA HPS",
+      "generationMWh": 400130.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 150.0,
+      "fuel": "HYDRO",
+      "latitude": 14.896765,
+      "longitude": 74.354388
+    },
+    {
+      "fiscalYear": "2021-22",
+      "plantName": "KAIGA",
+      "generationMWh": 6780690.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 1760.0,
+      "fuel": "NUCLEAR",
+      "latitude": 14.669342,
+      "longitude": 74.309005
+    },
+    {
+      "fiscalYear": "2021-22",
+      "plantName": "KALINADI HPS",
+      "generationMWh": 3668530.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 855.0,
+      "fuel": "HYDRO",
+      "latitude": 14.95503,
+      "longitude": 74.590444
+    },
+    {
+      "fiscalYear": "2021-22",
+      "plantName": "KALINADI SUPA HPS",
+      "generationMWh": 606730.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 100.0,
+      "fuel": "HYDRO",
+      "latitude": 15.2761,
+      "longitude": 74.5268
+    },
+    {
+      "fiscalYear": "2021-22",
+      "plantName": "KODASALI HPS",
+      "generationMWh": 423430.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 120.0,
+      "fuel": "HYDRO",
+      "latitude": 14.920447,
+      "longitude": 74.534997
+    },
+    {
+      "fiscalYear": "2021-22",
+      "plantName": "LIGANAMAKKI HPS",
+      "generationMWh": 276490.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 55.0,
+      "fuel": "HYDRO",
+      "latitude": 14.176729,
+      "longitude": 74.850336
+    },
+    {
+      "fiscalYear": "2021-22",
+      "plantName": "MUNIRABAD HPS",
+      "generationMWh": 131400.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 28.0,
+      "fuel": "HYDRO",
+      "latitude": 15.266677,
+      "longitude": 76.32939
+    },
+    {
+      "fiscalYear": "2021-22",
+      "plantName": "SHARAVATHI HPS",
+      "generationMWh": 4969370.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 1035.0,
+      "fuel": "HYDRO",
+      "latitude": 14.2352,
+      "longitude": 74.7673
+    },
+    {
+      "fiscalYear": "2021-22",
+      "plantName": "SIVASAMUNDRUM HPS",
+      "generationMWh": 299500.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 42.0,
+      "fuel": "HYDRO",
+      "latitude": 12.29866,
+      "longitude": 77.171557
+    },
+    {
+      "fiscalYear": "2021-22",
+      "plantName": "T B DAM HPS",
+      "generationMWh": 101470.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 36.0,
+      "fuel": "HYDRO",
+      "latitude": 15.261329,
+      "longitude": 76.338291
+    },
+    {
+      "fiscalYear": "2021-22",
+      "plantName": "VARAHI HPS",
+      "generationMWh": 1131620.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 460.0,
+      "fuel": "HYDRO",
+      "latitude": 13.659201,
+      "longitude": 74.956029
+    },
+    {
+      "fiscalYear": "2022-23",
+      "plantName": "BELLARY TPS",
+      "generationMWh": 6567000.0,
+      "co2Tonnes": 7755762.0,
+      "capacityMW": 1700.0,
+      "fuel": "COAL",
+      "latitude": 15.1931738,
+      "longitude": 76.7195034
+    },
+    {
+      "fiscalYear": "2022-23",
+      "plantName": "KUDGI STPP",
+      "generationMWh": 10646000.0,
+      "co2Tonnes": 8917647.07,
+      "capacityMW": 2400.0,
+      "fuel": "COAL",
+      "latitude": 16.499546,
+      "longitude": 75.834632
+    },
+    {
+      "fiscalYear": "2022-23",
+      "plantName": "RAICHUR TPS",
+      "generationMWh": 5837060.0,
+      "co2Tonnes": 6273217.73,
+      "capacityMW": 1720.0,
+      "fuel": "COAL",
+      "latitude": 16.3532,
+      "longitude": 77.3422
+    },
+    {
+      "fiscalYear": "2022-23",
+      "plantName": "TORANGALLU TPS(SBU-I)",
+      "generationMWh": 1692030.0,
+      "co2Tonnes": 1305004.77,
+      "capacityMW": 260.0,
+      "fuel": "COAL",
+      "latitude": 15.186771,
+      "longitude": 76.6621387
+    },
+    {
+      "fiscalYear": "2022-23",
+      "plantName": "TORANGALLU TPS(SBU-II)",
+      "generationMWh": 1858020.0,
+      "co2Tonnes": 1624495.28,
+      "capacityMW": 600.0,
+      "fuel": "COAL",
+      "latitude": 15.186771,
+      "longitude": 76.6621387
+    },
+    {
+      "fiscalYear": "2022-23",
+      "plantName": "UDUPI TPP",
+      "generationMWh": 1269500.0,
+      "co2Tonnes": 1193393.59,
+      "capacityMW": 1200.0,
+      "fuel": "COAL",
+      "latitude": 13.1596,
+      "longitude": 74.8002
+    },
+    {
+      "fiscalYear": "2022-23",
+      "plantName": "YERMARUS TPP",
+      "generationMWh": 4367700.0,
+      "co2Tonnes": 4059693.8,
+      "capacityMW": 1600.0,
+      "fuel": "COAL",
+      "latitude": 16.295261,
+      "longitude": 77.35612
+    },
+    {
+      "fiscalYear": "2022-23",
+      "plantName": "ALMATTI DPH HPS",
+      "generationMWh": 623490.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 290.0,
+      "fuel": "HYDRO",
+      "latitude": 16.331062,
+      "longitude": 75.888343
+    },
+    {
+      "fiscalYear": "2022-23",
+      "plantName": "BHADRA HPS",
+      "generationMWh": 104180.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 26.0,
+      "fuel": "HYDRO",
+      "latitude": 13.700031,
+      "longitude": 75.640161
+    },
+    {
+      "fiscalYear": "2022-23",
+      "plantName": "GHAT PRABHA HPS",
+      "generationMWh": 86780.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 32.0,
+      "fuel": "HYDRO",
+      "latitude": 16.1424,
+      "longitude": 74.6447
+    },
+    {
+      "fiscalYear": "2022-23",
+      "plantName": "HAMPI HPS",
+      "generationMWh": 104240.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 36.0,
+      "fuel": "HYDRO",
+      "latitude": 15.312089,
+      "longitude": 76.528886
+    },
+    {
+      "fiscalYear": "2022-23",
+      "plantName": "JOG HPS",
+      "generationMWh": 548230.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 139.0,
+      "fuel": "HYDRO",
+      "latitude": 14.229506,
+      "longitude": 74.812657
+    },
+    {
+      "fiscalYear": "2022-23",
+      "plantName": "KADRA HPS",
+      "generationMWh": 353950.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 150.0,
+      "fuel": "HYDRO",
+      "latitude": 14.896765,
+      "longitude": 74.354388
+    },
+    {
+      "fiscalYear": "2022-23",
+      "plantName": "KAIGA",
+      "generationMWh": 6661700.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 880.0,
+      "fuel": "NUCLEAR",
+      "latitude": 14.669342,
+      "longitude": 74.309005
+    },
+    {
+      "fiscalYear": "2022-23",
+      "plantName": "KALINADI HPS",
+      "generationMWh": 2829270.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 900.0,
+      "fuel": "HYDRO",
+      "latitude": 14.95503,
+      "longitude": 74.590444
+    },
+    {
+      "fiscalYear": "2022-23",
+      "plantName": "KALINADI SUPA HPS",
+      "generationMWh": 375070.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 100.0,
+      "fuel": "HYDRO",
+      "latitude": 15.2761,
+      "longitude": 74.5268
+    },
+    {
+      "fiscalYear": "2022-23",
+      "plantName": "KODASALI HPS",
+      "generationMWh": 343520.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 120.0,
+      "fuel": "HYDRO",
+      "latitude": 14.920447,
+      "longitude": 74.534997
+    },
+    {
+      "fiscalYear": "2022-23",
+      "plantName": "LIGANAMAKKI HPS",
+      "generationMWh": 252940.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 55.0,
+      "fuel": "HYDRO",
+      "latitude": 14.176729,
+      "longitude": 74.850336
+    },
+    {
+      "fiscalYear": "2022-23",
+      "plantName": "MUNIRABAD HPS",
+      "generationMWh": 114370.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 28.0,
+      "fuel": "HYDRO",
+      "latitude": 15.266677,
+      "longitude": 76.32939
+    },
+    {
+      "fiscalYear": "2022-23",
+      "plantName": "SHARAVATHI HPS",
+      "generationMWh": 5194710.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 1035.0,
+      "fuel": "HYDRO",
+      "latitude": 14.2352,
+      "longitude": 74.7673
+    },
+    {
+      "fiscalYear": "2022-23",
+      "plantName": "SIVASAMUNDRUM HPS",
+      "generationMWh": 284500.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 42.0,
+      "fuel": "HYDRO",
+      "latitude": 12.29866,
+      "longitude": 77.171557
+    },
+    {
+      "fiscalYear": "2022-23",
+      "plantName": "T B DAM HPS",
+      "generationMWh": 88100.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 36.0,
+      "fuel": "HYDRO",
+      "latitude": 15.261329,
+      "longitude": 76.338291
+    },
+    {
+      "fiscalYear": "2022-23",
+      "plantName": "VARAHI HPS",
+      "generationMWh": 1224960.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 460.0,
+      "fuel": "HYDRO",
+      "latitude": 13.659201,
+      "longitude": 74.956029
+    },
+    {
+      "fiscalYear": "2023-24",
+      "plantName": "BELLARY TPS",
+      "generationMWh": 7630600.0,
+      "co2Tonnes": 8217518.41,
+      "capacityMW": 1700.0,
+      "fuel": "COAL",
+      "latitude": 15.1931738,
+      "longitude": 76.7195034
+    },
+    {
+      "fiscalYear": "2023-24",
+      "plantName": "KUDGI STPP",
+      "generationMWh": 11342000.0,
+      "co2Tonnes": 9891152.68,
+      "capacityMW": 2400.0,
+      "fuel": "COAL",
+      "latitude": 16.499546,
+      "longitude": 75.834632
+    },
+    {
+      "fiscalYear": "2023-24",
+      "plantName": "RAICHUR TPS",
+      "generationMWh": 7002970.0,
+      "co2Tonnes": 8283471.14,
+      "capacityMW": 1720.0,
+      "fuel": "COAL",
+      "latitude": 16.3532,
+      "longitude": 77.3422
+    },
+    {
+      "fiscalYear": "2023-24",
+      "plantName": "TORANGALLU TPS(SBU-I)",
+      "generationMWh": 1586280.0,
+      "co2Tonnes": 1150392.53,
+      "capacityMW": 260.0,
+      "fuel": "COAL",
+      "latitude": 15.186771,
+      "longitude": 76.6621387
+    },
+    {
+      "fiscalYear": "2023-24",
+      "plantName": "TORANGALLU TPS(SBU-II)",
+      "generationMWh": 2480790.0,
+      "co2Tonnes": 2100717.25,
+      "capacityMW": 600.0,
+      "fuel": "COAL",
+      "latitude": 15.186771,
+      "longitude": 76.6621387
+    },
+    {
+      "fiscalYear": "2023-24",
+      "plantName": "UDUPI TPP",
+      "generationMWh": 5276740.0,
+      "co2Tonnes": 4736228.62,
+      "capacityMW": 1200.0,
+      "fuel": "COAL",
+      "latitude": 13.1596,
+      "longitude": 74.8002
+    },
+    {
+      "fiscalYear": "2023-24",
+      "plantName": "YERMARUS TPP",
+      "generationMWh": 5721980.0,
+      "co2Tonnes": 5438254.84,
+      "capacityMW": 1600.0,
+      "fuel": "COAL",
+      "latitude": 16.295261,
+      "longitude": 77.35612
+    },
+    {
+      "fiscalYear": "2023-24",
+      "plantName": "ALMATTI DPH HPS",
+      "generationMWh": 240850.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 290.0,
+      "fuel": "HYDRO",
+      "latitude": 16.331062,
+      "longitude": 75.888343
+    },
+    {
+      "fiscalYear": "2023-24",
+      "plantName": "BHADRA HPS",
+      "generationMWh": 26600.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 26.0,
+      "fuel": "HYDRO",
+      "latitude": 13.700031,
+      "longitude": 75.640161
+    },
+    {
+      "fiscalYear": "2023-24",
+      "plantName": "GHAT PRABHA HPS",
+      "generationMWh": 42530.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 32.0,
+      "fuel": "HYDRO",
+      "latitude": 16.1424,
+      "longitude": 74.6447
+    },
+    {
+      "fiscalYear": "2023-24",
+      "plantName": "HAMPI HPS",
+      "generationMWh": 64950.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 36.0,
+      "fuel": "HYDRO",
+      "latitude": 15.312089,
+      "longitude": 76.528886
+    },
+    {
+      "fiscalYear": "2023-24",
+      "plantName": "JOG HPS",
+      "generationMWh": 341020.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 139.0,
+      "fuel": "HYDRO",
+      "latitude": 14.229506,
+      "longitude": 74.812657
+    },
+    {
+      "fiscalYear": "2023-24",
+      "plantName": "KADRA HPS",
+      "generationMWh": 277360.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 150.0,
+      "fuel": "HYDRO",
+      "latitude": 14.896765,
+      "longitude": 74.354388
+    },
+    {
+      "fiscalYear": "2023-24",
+      "plantName": "KAIGA",
+      "generationMWh": 6714870.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 880.0,
+      "fuel": "NUCLEAR",
+      "latitude": 14.669342,
+      "longitude": 74.309005
+    },
+    {
+      "fiscalYear": "2023-24",
+      "plantName": "KALINADI HPS",
+      "generationMWh": 2523640.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 900.0,
+      "fuel": "HYDRO",
+      "latitude": 14.95503,
+      "longitude": 74.590444
+    },
+    {
+      "fiscalYear": "2023-24",
+      "plantName": "KALINADI SUPA HPS",
+      "generationMWh": 423580.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 100.0,
+      "fuel": "HYDRO",
+      "latitude": 15.2761,
+      "longitude": 74.5268
+    },
+    {
+      "fiscalYear": "2023-24",
+      "plantName": "KODASALI HPS",
+      "generationMWh": 281700.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 120.0,
+      "fuel": "HYDRO",
+      "latitude": 14.920447,
+      "longitude": 74.534997
+    },
+    {
+      "fiscalYear": "2023-24",
+      "plantName": "LIGANAMAKKI HPS",
+      "generationMWh": 149320.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 55.0,
+      "fuel": "HYDRO",
+      "latitude": 14.176729,
+      "longitude": 74.850336
+    },
+    {
+      "fiscalYear": "2023-24",
+      "plantName": "MUNIRABAD HPS",
+      "generationMWh": 31490.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 28.0,
+      "fuel": "HYDRO",
+      "latitude": 15.266677,
+      "longitude": 76.32939
+    },
+    {
+      "fiscalYear": "2023-24",
+      "plantName": "SHARAVATHI HPS",
+      "generationMWh": 3341460.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 1035.0,
+      "fuel": "HYDRO",
+      "latitude": 14.2352,
+      "longitude": 74.7673
+    },
+    {
+      "fiscalYear": "2023-24",
+      "plantName": "SIVASAMUNDRUM HPS",
+      "generationMWh": 159740.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 42.0,
+      "fuel": "HYDRO",
+      "latitude": 12.29866,
+      "longitude": 77.171557
+    },
+    {
+      "fiscalYear": "2023-24",
+      "plantName": "T B DAM HPS",
+      "generationMWh": 33320.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 36.0,
+      "fuel": "HYDRO",
+      "latitude": 15.261329,
+      "longitude": 76.338291
+    },
+    {
+      "fiscalYear": "2023-24",
+      "plantName": "VARAHI HPS",
+      "generationMWh": 644630.0,
+      "co2Tonnes": 0.0,
+      "capacityMW": 460.0,
+      "fuel": "HYDRO",
+      "latitude": 13.659201,
+      "longitude": 74.956029
+    }
+  ]
+}

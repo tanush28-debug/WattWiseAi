@@ -4,6 +4,9 @@ import { StatCard } from '../../components/common/StatCard';
 import { ChartWrapper } from '../../components/charts/ChartWrapper';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { analyticsService } from '../../services/analyticsService';
+import { industrialService } from '../../services/industrialService';
+import { useAuth } from '../../contexts/AuthContext';
+import { USER_ROLES } from '../../config/constants';
 import { formatCO2, formatKWh } from '../../utils/formatters';
 import {
   AreaChart,
@@ -15,11 +18,14 @@ import {
   Legend,
   ResponsiveContainer
 } from 'recharts';
-import { Leaf, TreePine, Car, Recycle, Info, ArrowDownRight, Sun, Fan, Thermometer, ShieldCheck, Zap, Activity } from 'lucide-react';
+import { Leaf, TreePine, Car, Recycle, Info, ArrowDownRight, Sun, Fan, Thermometer, ShieldCheck, Zap, Activity, Database } from 'lucide-react';
 
 export const CarbonFootprint = () => {
   const [data, setData] = useState(null);
+  const [benchmark, setBenchmark] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { role } = useAuth();
+  const isIndustrial = role === USER_ROLES.INDUSTRIAL;
 
   useEffect(() => {
     const fetchCarbon = async () => {
@@ -35,12 +41,30 @@ export const CarbonFootprint = () => {
     fetchCarbon();
   }, []);
 
+  useEffect(() => {
+    if (!isIndustrial) return;
+    const fetchBenchmark = async () => {
+      try {
+        const res = await industrialService.getOverview();
+        if (res.data?.isBenchmark) setBenchmark(res.data);
+      } catch (err) {
+        console.error('Error fetching generation emissions benchmark:', err);
+      }
+    };
+    fetchBenchmark();
+  }, [isIndustrial]);
+
   if (loading) {
     return <LoadingSpinner size="lg" message="Computing carbon emissions & statutory CEA offsets..." />;
   }
 
   const equivalents = data?.offsetEquivalents || {};
   const currentEmissions = data?.currentEmissionsKg || 0;
+  const benchmarkIntensity =
+    benchmark?.totalConsumptionMWh > 0
+      ? benchmark.carbonEmissionsTonnes / benchmark.totalConsumptionMWh
+      : null;
+  const showBenchmark = isIndustrial && benchmark?.isBenchmark && !data?.verifiedBillsCount;
 
   return (
     <div className="space-y-8">
@@ -94,6 +118,47 @@ export const CarbonFootprint = () => {
           </p>
         </div>
       </div>
+
+      {showBenchmark && (
+        <Card
+          title="Karnataka Grid Generation Emissions (CEA/NPP Benchmark)"
+          subtitle={`State power plants · FY ${benchmark.dataSource?.fiscalYear} · not your facility footprint`}
+        >
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+            <div className="p-4 rounded-xl border border-ivory-200 bg-ivory-100/60">
+              <p className="text-[10px] font-mono uppercase tracking-wider text-midnight-500">Net Generation</p>
+              <p className="text-lg font-black font-mono text-midnight-900 mt-1">
+                {new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 }).format(
+                  benchmark.totalConsumptionMWh
+                )}{' '}
+                MWh
+              </p>
+            </div>
+            <div className="p-4 rounded-xl border border-ivory-200 bg-ivory-100/60">
+              <p className="text-[10px] font-mono uppercase tracking-wider text-midnight-500">Reported CO₂</p>
+              <p className="text-lg font-black font-mono text-midnight-900 mt-1">
+                {new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 }).format(
+                  benchmark.carbonEmissionsTonnes
+                )}{' '}
+                t CO₂
+              </p>
+            </div>
+            <div className="p-4 rounded-xl border border-ivory-200 bg-ivory-100/60">
+              <p className="text-[10px] font-mono uppercase tracking-wider text-midnight-500">
+                Generation Intensity
+              </p>
+              <p className="text-lg font-black font-mono text-midnight-900 mt-1">
+                {benchmarkIntensity !== null ? `${benchmarkIntensity.toFixed(3)} kg CO₂/kWh` : '—'}
+              </p>
+            </div>
+          </div>
+          <p className="text-[11px] text-midnight-500 mt-3 flex items-start gap-1.5">
+            <Database className="w-3.5 h-3.5 text-cobalt-600 shrink-0 mt-0.5" />
+            Source: CEA/NPP station-wise generation compiled by CHETNA (Zenodo), CC BY 4.0. Upload and confirm
+            your own bills to see your facility footprint above.
+          </p>
+        </Card>
+      )}
 
       {/* Historical Emissions vs Target Chart */}
       <ChartWrapper
@@ -154,6 +219,7 @@ export const CarbonFootprint = () => {
       {/* Grid: Actual vs Reference Benchmark & Grid Carbon Intensity Breakdown */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Actual vs Benchmark Comparison */}
+        {!isIndustrial && (
         <Card
           title="Household Footprint vs Statutory Benchmarks"
           subtitle="Comparing your audited monthly emissions against regional baselines"
@@ -200,9 +266,11 @@ export const CarbonFootprint = () => {
             </p>
           </div>
         </Card>
+        )}
 
         {/* Grid Carbon Intensity by Power Source */}
         <Card
+          className={isIndustrial ? 'lg:col-span-2' : ''}
           title="National Grid Carbon Intensity by Generation Source"
           subtitle="Lifecycle and combustion carbon emission intensity (CEA & IPCC benchmarks)"
         >
@@ -245,7 +313,11 @@ export const CarbonFootprint = () => {
       {/* Estimated Emissions Reduction Opportunities */}
       <Card
         title="Actionable Emissions Abatement & Decarbonization Pathways"
-        subtitle="Targeted interventions to lower your household monthly greenhouse gas footprint"
+        subtitle={
+          isIndustrial
+            ? 'Targeted interventions to lower your facility monthly greenhouse gas footprint'
+            : 'Targeted interventions to lower your household monthly greenhouse gas footprint'
+        }
       >
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="p-4 rounded-xl border border-ivory-200 bg-ivory-100/60 space-y-2">

@@ -4,7 +4,9 @@ export const isGeminiConfigured = Boolean(config.gemini.apiKey);
 
 export const geminiConfig = {
   apiKey: config.gemini.apiKey,
-  modelName: 'gemini-1.5-flash',
+  modelName: config.gemini.model,
+  fallbackModels: config.gemini.fallbackModels,
+  timeoutMs: config.gemini.timeoutMs,
   isAvailable: isGeminiConfigured,
 };
 

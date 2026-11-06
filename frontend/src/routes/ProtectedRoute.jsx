@@ -17,7 +17,7 @@ export const ProtectedRoute = ({ children, allowedRoles }) => {
   }
 
   if (!isAuthenticated || !user) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    return <Navigate to={`/login?role=${allowedRoles?.[0] || USER_ROLES.CONSUMER}`} state={{ from: location }} replace />;
   }
 
   // If specific roles are required, verify access

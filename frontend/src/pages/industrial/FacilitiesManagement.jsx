@@ -8,7 +8,14 @@ import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { useToast } from '../../contexts/ToastContext';
 import { industrialService } from '../../services/industrialService';
 import { formatCurrency } from '../../utils/formatters';
-import { Building2, Plus, MapPin, Cpu, CheckCircle2 } from 'lucide-react';
+import { Building2, Plus, MapPin, Cpu, CheckCircle2, Database, Info } from 'lucide-react';
+
+const formatMWh = (value) => {
+  if (value === null || value === undefined) return '—';
+  return new Intl.NumberFormat('en-IN', { maximumFractionDigits: 1 }).format(value);
+};
+
+const isHealthyStatus = (status) => status === 'Optimal' || status === 'Operating';
 
 export const FacilitiesManagement = () => {
   const [facilities, setFacilities] = useState([]);
@@ -62,11 +69,14 @@ export const FacilitiesManagement = () => {
         fetchFacilities();
       }
     } catch (err) {
-      toast.error('Failed to register facility');
+      toast.error(err.message || 'Failed to register facility');
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  const isBenchmark = facilities[0]?.source === 'CEA_NPP_GENERATION';
+  const benchmarkFiscalYear = facilities[0]?.sourceFiscalYear;
 
   const columns = [
     {
@@ -87,21 +97,38 @@ export const FacilitiesManagement = () => {
       )
     },
     {
-      header: 'Monthly MWh',
+      header: isBenchmark ? 'Net Generation (MWh)' : 'Monthly MWh',
       key: 'consumptionMWh',
-      render: (val) => <span className="font-mono font-bold text-midnight-900">{val} MWh</span>
+      render: (val) => <span className="font-mono font-bold text-midnight-900">{formatMWh(val)} MWh</span>
     },
+    isBenchmark
+      ? {
+          header: 'Fuel / Capacity',
+          key: 'fuel',
+          render: (val, row) => (
+            <div>
+              <p className="font-semibold text-midnight-900">{val || '—'}</p>
+              <p className="text-[10px] text-midnight-500 font-mono">
+                {row.capacityMW ? `${formatMWh(row.capacityMW)} MW` : 'Capacity unavailable'}
+              </p>
+            </div>
+          )
+        }
+      : {
+          header: 'Monthly Energy Cost',
+          key: 'costINR',
+          render: (val, row) => (
+            <span className="font-mono font-semibold text-midnight-950">
+              {val || row?.costUSD ? formatCurrency(val || row?.costUSD) : '—'}
+            </span>
+          )
+        },
     {
-      header: 'Monthly Energy Cost',
-      key: 'costINR',
-      render: (val, row) => <span className="font-mono font-semibold text-midnight-950">{formatCurrency(val || row?.costUSD)}</span>
-    },
-    {
-      header: 'Active Equipment',
+      header: isBenchmark ? 'Generating Units' : 'Active Equipment',
       key: 'activeMachines',
       render: (val) => (
         <span className="font-mono text-xs text-midnight-700 flex items-center gap-1">
-          <Cpu className="w-3.5 h-3.5 text-midnight-500" /> {val} units
+          <Cpu className="w-3.5 h-3.5 text-midnight-500" /> {val ?? 0} units
         </span>
       )
     },
@@ -111,7 +138,7 @@ export const FacilitiesManagement = () => {
       render: (val) => (
         <span
           className={`font-mono text-[10px] px-2 py-0.5 rounded font-semibold ${
-            val === 'Optimal'
+            isHealthyStatus(val)
               ? 'bg-emerald-500/10 text-emerald-800 border border-emerald-500/20'
               : 'bg-amber-500/10 text-amber-800 border border-amber-500/20'
           }`}
@@ -128,20 +155,52 @@ export const FacilitiesManagement = () => {
         <div>
           <h2 className="text-2xl font-black text-midnight-900 tracking-tight">Industrial Facilities</h2>
           <p className="text-xs text-midnight-600 mt-0.5">
-            Monitor and benchmark electrical power usage across enterprise manufacturing plants.
+            {isBenchmark
+              ? 'Karnataka power plant generation benchmark from CEA/NPP station-level data.'
+              : 'Monitor and benchmark electrical power usage across enterprise manufacturing plants.'}
           </p>
         </div>
-        <Button
-          variant="primary"
-          size="sm"
-          onClick={() => setIsAddModalOpen(true)}
-          leftIcon={Plus}
-        >
-          Register New Facility
-        </Button>
+        {isBenchmark ? (
+          <span className="inline-flex items-center gap-1.5 text-[10px] font-mono font-semibold uppercase tracking-wider text-midnight-600 bg-ivory-100 border border-ivory-200 px-2.5 py-1.5 rounded-lg">
+            <Database className="w-3.5 h-3.5 text-cobalt-600" /> Benchmark dataset · read-only
+          </span>
+        ) : (
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => setIsAddModalOpen(true)}
+            leftIcon={Plus}
+          >
+            Register New Facility
+          </Button>
+        )}
       </div>
 
-      <Card title="Registered Manufacturing Plants" subtitle="Consolidated facility list and telemetry status">
+      {isBenchmark && (
+        <div className="rounded-xl border border-cobalt-200 bg-cobalt-50/60 p-4 flex items-start gap-3">
+          <Info className="w-4 h-4 text-cobalt-700 mt-0.5 shrink-0" />
+          <div className="space-y-1">
+            <p className="text-xs font-bold text-midnight-900">
+              Source: CEA / NPP station-wise generation data
+              {benchmarkFiscalYear ? ` · FY ${benchmarkFiscalYear}` : ''}
+            </p>
+            <p className="text-[11px] text-midnight-600 leading-relaxed">
+              These are Karnataka power plants, not your own factories. Values are net generation in MWh and
+              plant CO₂ estimates. Register facilities and import your own bills or meter data to replace this
+              benchmark view.
+            </p>
+          </div>
+        </div>
+      )}
+
+      <Card
+        title={isBenchmark ? 'Karnataka Generating Plants' : 'Registered Manufacturing Plants'}
+        subtitle={
+          isBenchmark
+            ? 'Station-level generation, capacity, and operational status'
+            : 'Consolidated facility list and telemetry status'
+        }
+      >
         <DataTable columns={columns} data={facilities} isLoading={loading} />
       </Card>
 

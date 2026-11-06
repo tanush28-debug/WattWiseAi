@@ -1,138 +1,152 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { supabase, isSupabaseConfigured } from '../services/supabaseClient';
 import { authService } from '../services/authService';
-import { USER_ROLES } from '../config/constants';
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [authError, setAuthError] = useState('');
+  const sessionVersion = useRef(0);
+  const operationVersion = useRef(0);
 
-  // Initialize and restore session on mount
   useEffect(() => {
     let mounted = true;
+    let timer;
 
-    const initAuth = async () => {
+    const restoreUser = async (sessionUser) => {
+      const version = ++sessionVersion.current;
       try {
-        const currentUser = await authService.getCurrentUser();
-        if (mounted) {
-          // If no stored user in demo mode, initialize with default Consumer user for instant preview
-          if (!currentUser && !isSupabaseConfigured) {
-            const defaultDemoUser = {
-              id: 'usr-demo-001',
-              email: 'sarah.jenkins@wattwise.ai',
-              fullName: 'Sarah Jenkins',
-              role: USER_ROLES.CONSUMER,
-              isDemo: true
-            };
-            setUser(defaultDemoUser);
-          } else {
-            setUser(currentUser);
-          }
+        const currentUser = await authService.getCurrentUser(sessionUser);
+        if (mounted && version === sessionVersion.current) {
+          setUser(currentUser);
+          setAuthError('');
         }
-      } catch (err) {
-        console.error('Auth initialization error:', err);
+      } catch (error) {
+        if (mounted && version === sessionVersion.current) {
+          setUser(null);
+          setAuthError(error.message || 'Unable to verify your account. Please try again.');
+        }
       } finally {
-        if (mounted) setLoading(false);
+        if (mounted && version === sessionVersion.current) setLoading(false);
       }
     };
 
-    initAuth();
-
-    // Listen to Supabase auth events if configured
-    let subscription = null;
+    let subscription;
     if (isSupabaseConfigured) {
-      const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
-        if (session?.user) {
-          const u = await authService.getCurrentUser();
-          if (mounted) setUser(u);
-        } else {
-          if (mounted) setUser(null);
+      const { data } = supabase.auth.onAuthStateChange((event, session) => {
+        clearTimeout(timer);
+        ++sessionVersion.current;
+        if (!session?.user) {
+          setUser(null);
+          setAuthError('');
+          setLoading(false);
+          return;
         }
+        setLoading(true);
+        // Supabase holds its session lock while notifying auth subscribers.
+        timer = setTimeout(() => restoreUser(session.user), 0);
       });
-      subscription = data?.subscription;
+      subscription = data.subscription;
+    } else {
+      restoreUser();
     }
 
     return () => {
       mounted = false;
-      if (subscription) subscription.unsubscribe();
+      ++sessionVersion.current;
+      ++operationVersion.current;
+      clearTimeout(timer);
+      subscription?.unsubscribe();
     };
   }, []);
 
   const login = useCallback(async (credentials) => {
+    const operation = ++operationVersion.current;
+    ++sessionVersion.current;
     setLoading(true);
+    setAuthError('');
     try {
       const result = await authService.login(credentials);
-      setUser(result.user);
+      if (operation === operationVersion.current) {
+        ++sessionVersion.current;
+        setUser(result.user);
+      }
       return result;
+    } catch (error) {
+      if (operation === operationVersion.current) {
+        ++sessionVersion.current;
+        setUser(null);
+        setAuthError(error.message || 'Unable to sign in. Please try again.');
+      }
+      throw error;
     } finally {
-      setLoading(false);
+      if (operation === operationVersion.current) setLoading(false);
     }
   }, []);
 
   const register = useCallback(async (payload) => {
+    const operation = ++operationVersion.current;
+    ++sessionVersion.current;
     setLoading(true);
+    setAuthError('');
     try {
       const result = await authService.register(payload);
-      if (result.user && !result.needsVerification) {
+      if (operation === operationVersion.current) {
+        ++sessionVersion.current;
         setUser(result.user);
       }
       return result;
+    } catch (error) {
+      if (operation === operationVersion.current) {
+        ++sessionVersion.current;
+        setUser(null);
+        setAuthError(error.message || 'Unable to verify your new account. Please try again.');
+      }
+      throw error;
     } finally {
-      setLoading(false);
+      if (operation === operationVersion.current) setLoading(false);
     }
   }, []);
 
   const logout = useCallback(async () => {
+    const operation = ++operationVersion.current;
+    ++sessionVersion.current;
     setLoading(true);
     try {
       await authService.logout();
-      setUser(null);
+      if (operation === operationVersion.current) {
+        ++sessionVersion.current;
+        setUser(null);
+        setAuthError('');
+      }
     } finally {
-      setLoading(false);
+      if (operation === operationVersion.current) setLoading(false);
     }
   }, []);
 
-  const forgotPassword = useCallback(async (email) => {
-    return await authService.forgotPassword(email);
-  }, []);
+  const forgotPassword = useCallback((email) => authService.forgotPassword(email), []);
 
   const resetPassword = useCallback(async (newPassword) => {
-    return await authService.resetPassword(newPassword);
+    const result = await authService.resetPassword(newPassword);
+    ++sessionVersion.current;
+    setUser(null);
+    return result;
   }, []);
-
-  /**
-   * Evaluator role switch: allows judges and hackathon reviewers to switch views
-   */
-  const switchDemoRole = useCallback((newRole) => {
-    if (!user) return;
-    const names = {
-      [USER_ROLES.CONSUMER]: 'Sarah Jenkins (Consumer)',
-      [USER_ROLES.INDUSTRIAL]: 'Marcus Vance (Industrial Director)',
-      [USER_ROLES.GOVERNMENT]: 'Dr. Elena Rostova (Energy Policy Admin)'
-    };
-    const updated = {
-      ...user,
-      role: newRole,
-      fullName: names[newRole] || user.fullName
-    };
-    setUser(updated);
-    localStorage.setItem('wattwise_active_user', JSON.stringify(updated));
-  }, [user]);
 
   const value = {
     user,
     role: user?.role || null,
     isAuthenticated: !!user,
     loading,
+    authError,
     isSupabaseConfigured,
     login,
     register,
     logout,
     forgotPassword,
-    resetPassword,
-    switchDemoRole
+    resetPassword
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -140,9 +154,6 @@ export const AuthProvider = ({ children }) => {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
+  if (!context) throw new Error('useAuth must be used within an AuthProvider');
   return context;
 };
-

@@ -44,7 +44,7 @@ export const PublicNavbar = () => {
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-ivory-100/90 backdrop-blur-md border-b border-ivory-300">
+    <header className="sticky top-0 z-40 border-b border-slate-300 bg-ivory-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-8 py-4 flex items-center justify-between">
         {/* Brand Logo - clickable, navigates home & scrolls to top */}
         <Link
@@ -58,7 +58,7 @@ export const PublicNavbar = () => {
           className="flex items-center gap-2.5 group cursor-pointer"
           title="WattWise AI - Home"
         >
-          <div className="w-9 h-9 rounded-xl bg-cobalt-500 flex items-center justify-center text-white shadow-cobalt-sm group-hover:scale-105 transition-transform">
+          <div className="flex h-9 w-9 items-center justify-center rounded-md bg-cobalt-600 text-white">
             <Zap className="w-5 h-5 fill-white stroke-white" />
           </div>
           <div>
@@ -143,7 +143,7 @@ export const PublicNavbar = () => {
         {/* Mobile Toggle */}
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="p-2 -mr-2 rounded-xl text-midnight-800 hover:bg-ivory-200 md:hidden"
+          className="-mr-2 rounded-md p-2 text-midnight-800 hover:bg-ivory-200 md:hidden"
         >
           {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
@@ -151,7 +151,7 @@ export const PublicNavbar = () => {
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-b border-ivory-300 bg-ivory-50 px-4 py-5 flex flex-col gap-4 text-sm font-medium">
+        <div className="flex flex-col gap-4 border-b border-slate-200 bg-white px-4 py-5 text-sm font-medium md:hidden">
           <button
             onClick={() => scrollToSection('home')}
             className="text-left text-midnight-900 hover:text-cobalt-600 py-1"

@@ -34,10 +34,13 @@ export const billController = {
         scopedClient: req.supabase,
       });
 
+      const extractionStatus = bill.validation?.status;
       res.status(201).json({
         success: true,
         data: bill,
-        message: 'Bill uploaded successfully and extracted.',
+        message: extractionStatus === 'MANUAL_ENTRY_REQUIRED'
+          ? 'Bill uploaded and stored. Automatic extraction could not confirm the final amount or units; review and enter the missing values.'
+          : 'Bill uploaded, extracted and saved as a draft. Every field must be reviewed and confirmed before it is marked verified.',
       });
     } catch (err) {
       next(err);

@@ -18,8 +18,8 @@ export const Select = ({
   const selectId = id || name || Math.random().toString(36).substring(2, 9);
 
   const surfaceStyles = surface === 'dark'
-    ? 'bg-midnight-850 border-midnight-700 text-ivory-100 focus:border-cobalt-500 focus:ring-cobalt-500/20'
-    : 'bg-white border-ivory-300 text-midnight-900 focus:border-cobalt-500 focus:ring-cobalt-500/10';
+    ? 'bg-slate-900 border-slate-700 text-slate-100 focus:border-cobalt-500 focus:ring-cobalt-500/20'
+    : 'bg-white border-slate-300 text-slate-900 focus:border-cobalt-500 focus:ring-cobalt-500/20';
 
   return (
     <div className={`flex flex-col gap-1.5 ${className}`}>
@@ -27,7 +27,7 @@ export const Select = ({
         <label
           htmlFor={selectId}
           className={`text-xs font-semibold tracking-wide ${
-            surface === 'dark' ? 'text-ivory-300' : 'text-midnight-800'
+            surface === 'dark' ? 'text-slate-300' : 'text-slate-700'
           }`}
         >
           {label} {required && <span className="text-cobalt-600">*</span>}
@@ -42,7 +42,7 @@ export const Select = ({
           onChange={onChange}
           disabled={disabled}
           required={required}
-          className={`w-full appearance-none rounded-xl border px-3.5 py-2.5 pr-10 text-sm transition-all duration-150 outline-none focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+          className={`w-full appearance-none rounded-md border px-3.5 py-2.5 pr-10 text-sm outline-none transition-colors focus:ring-2 disabled:cursor-not-allowed disabled:opacity-50 ${
             error ? 'border-rose-500' : ''
           } ${surfaceStyles}`}
           {...props}
@@ -51,7 +51,7 @@ export const Select = ({
             <option
               key={opt.value ?? opt.id ?? opt}
               value={opt.value ?? opt.id ?? opt}
-              className={surface === 'dark' ? 'bg-midnight-900 text-ivory-100' : 'bg-white text-midnight-900'}
+              className={surface === 'dark' ? 'bg-slate-900 text-slate-100' : 'bg-white text-slate-900'}
             >
               {opt.label ?? opt.name ?? opt}
             </option>

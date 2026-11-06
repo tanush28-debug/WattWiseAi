@@ -33,11 +33,11 @@ export const Navbar = ({ onOpenSidebar, pageTitle = 'Dashboard' }) => {
   const BadgeIcon = badge.icon;
 
   return (
-    <header className="sticky top-0 z-30 bg-ivory-100/90 backdrop-blur-md border-b border-ivory-300 px-4 sm:px-8 py-3.5 flex items-center justify-between">
+    <header className="sticky top-0 z-30 flex items-center justify-between border-b border-slate-300 bg-ivory-100 px-4 py-3.5 sm:px-8">
       <div className="flex items-center gap-3">
         <button
           onClick={onOpenSidebar}
-          className="p-2 -ml-2 rounded-xl text-midnight-800 hover:bg-ivory-200 lg:hidden"
+          className="-ml-2 rounded-md p-2 text-midnight-800 hover:bg-ivory-200 lg:hidden"
           aria-label="Open sidebar"
         >
           <Menu className="w-5 h-5" />
@@ -45,7 +45,7 @@ export const Navbar = ({ onOpenSidebar, pageTitle = 'Dashboard' }) => {
 
         {/* Mobile quick logo - navigates home without logging out */}
         <Link to="/" className="lg:hidden flex items-center gap-1.5" title="WattWise Home">
-          <div className="w-7 h-7 rounded-lg bg-cobalt-500 flex items-center justify-center text-white">
+          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-cobalt-600 text-white">
             <Zap className="w-4 h-4 fill-white" />
           </div>
         </Link>
@@ -57,7 +57,7 @@ export const Navbar = ({ onOpenSidebar, pageTitle = 'Dashboard' }) => {
 
       <div className="flex items-center gap-3">
         {/* Current Active Workspace Indicator (Static display only - no dropdown) */}
-        <div className={`hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold shadow-sm ${badge.styles}`}>
+        <div className={`hidden items-center gap-2 rounded-sm border px-3 py-1.5 text-xs font-semibold sm:flex ${badge.styles}`}>
           <span className="w-2 h-2 rounded-full bg-cobalt-500" />
           <BadgeIcon className="w-3.5 h-3.5 text-cobalt-500" />
           <span>{badge.label}</span>
@@ -65,14 +65,14 @@ export const Navbar = ({ onOpenSidebar, pageTitle = 'Dashboard' }) => {
 
         {/* User Identity pill */}
         {user?.fullName && (
-          <div className="hidden md:flex items-center gap-1.5 text-xs text-midnight-600 font-medium px-2 py-1 bg-ivory-200/70 rounded-lg">
+          <div className="hidden items-center gap-1.5 rounded-sm bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600 md:flex">
             <span className="truncate max-w-[150px]">{user.fullName}</span>
           </div>
         )}
 
         {/* Notification Bell */}
         <button
-          className="relative p-2 rounded-xl text-midnight-700 hover:text-midnight-900 hover:bg-ivory-200 transition-colors"
+          className="relative rounded-md p-2 text-midnight-700 transition-colors hover:bg-ivory-200 hover:text-midnight-900"
           title="Notifications"
           aria-label="Notifications"
         >

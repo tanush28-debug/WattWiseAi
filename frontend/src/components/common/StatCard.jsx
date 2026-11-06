@@ -1,5 +1,5 @@
 import React from 'react';
-import { TrendingDown, TrendingUp, Minus } from 'lucide-react';
+import { TrendingDown, TrendingUp } from 'lucide-react';
 
 export const StatCard = ({
   title,
@@ -14,45 +14,46 @@ export const StatCard = ({
 }) => {
   const isTrendZero = trend === 0 || trend === null || trend === undefined;
   const isPositive = trend > 0;
-  
-  // Is this trend good?
+
   const isGood = isNegativeGood ? !isPositive : isPositive;
 
   return (
-    <div className={`relative bg-white rounded-2xl border border-ivory-300 p-5 shadow-subtle hover:border-ivory-400 transition-all duration-200 flex flex-col justify-between ${className}`}>
+    <div
+      className={`relative flex flex-col justify-between rounded-md border border-slate-200 bg-white p-5 ${className}`}
+    >
       {isDemo && (
-        <span className="absolute top-3 right-3 text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-700 border border-amber-500/20">
+        <span className="absolute right-3 top-3 rounded-sm border border-amber-300 bg-amber-50 px-1.5 py-0.5 font-mono text-[10px] text-amber-800">
           DEMO
         </span>
       )}
 
-      <div className="flex items-start justify-between">
-        <p className="text-xs font-semibold text-midnight-600 uppercase tracking-wider">{title}</p>
+      <div className="flex items-start justify-between gap-3">
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">{title}</p>
         {Icon && (
-          <div className="w-9 h-9 rounded-xl bg-ivory-100 border border-ivory-200 flex items-center justify-center text-midnight-800">
-            <Icon className="w-4 h-4 text-midnight-800" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-sm border border-slate-200 bg-slate-50 text-slate-700">
+            <Icon className="h-4 w-4" />
           </div>
         )}
       </div>
 
-      <div className="my-2.5">
-        <h4 className="text-2xl font-extrabold text-midnight-900 tracking-tight font-sans">{value}</h4>
-        {subtitle && <p className="text-xs text-midnight-500 mt-0.5">{subtitle}</p>}
+      <div className="my-3">
+        <h4 className="font-mono text-2xl font-semibold tabular-nums tracking-tight text-slate-900">
+          {value}
+        </h4>
+        {subtitle && <p className="mt-1 text-xs text-slate-500">{subtitle}</p>}
       </div>
 
       {!isTrendZero && (
-        <div className="flex items-center gap-1.5 text-xs font-medium">
+        <div className="flex items-center gap-2 text-xs">
           <span
-            className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md font-mono text-[11px] ${
-              isGood
-                ? 'bg-emerald-500/10 text-emerald-700'
-                : 'bg-rose-500/10 text-rose-700'
+            className={`inline-flex items-center gap-0.5 rounded-sm px-1.5 py-0.5 font-mono text-[11px] tabular-nums ${
+              isGood ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'
             }`}
           >
-            {isPositive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+            {isPositive ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
             {isPositive ? `+${trend}%` : `${trend}%`}
           </span>
-          <span className="text-midnight-500 text-[11px]">{trendLabel}</span>
+          <span className="text-[11px] text-slate-500">{trendLabel}</span>
         </div>
       )}
     </div>
@@ -60,4 +61,3 @@ export const StatCard = ({
 };
 
 export default StatCard;
-

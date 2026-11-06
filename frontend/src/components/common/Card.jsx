@@ -13,27 +13,35 @@ export const Card = ({
   isDemo = false
 }) => {
   return (
-    <div className={`relative bg-white rounded-2xl border border-ivory-300 shadow-subtle overflow-hidden flex flex-col ${className}`}>
+    <div
+      className={`relative flex flex-col overflow-hidden rounded-md border border-slate-200 bg-white ${className}`}
+    >
       {isDemo && (
-        <div className="absolute top-3 right-3 z-10">
+        <div className="absolute right-3 top-3 z-10">
           <span className="badge-demo">DEMO DATA</span>
         </div>
       )}
 
       {(title || subtitle || action) && (
-        <div className={`px-6 py-4 border-b border-ivory-200 flex items-center justify-between ${headerClassName}`}>
-          <div>
-            {title && <h3 className="text-sm font-bold text-midnight-900 tracking-tight">{title}</h3>}
-            {subtitle && <p className="text-xs text-midnight-600 mt-0.5">{subtitle}</p>}
+        <div
+          className={`flex items-center justify-between gap-3 border-b border-slate-200 bg-white px-5 py-3.5 ${headerClassName}`}
+        >
+          <div className="min-w-0">
+            {title && (
+              <h3 className="truncate text-sm font-semibold tracking-tight text-slate-900">
+                {title}
+              </h3>
+            )}
+            {subtitle && <p className="mt-0.5 text-xs text-slate-500">{subtitle}</p>}
           </div>
-          {action && <div>{action}</div>}
+          {action && <div className="shrink-0">{action}</div>}
         </div>
       )}
 
-      <div className={`p-6 flex-1 ${bodyClassName}`}>{children}</div>
+      <div className={`flex-1 p-5 ${bodyClassName}`}>{children}</div>
 
       {footer && (
-        <div className={`px-6 py-3.5 bg-ivory-50/70 border-t border-ivory-200 ${footerClassName}`}>
+        <div className={`border-t border-slate-200 bg-slate-50 px-5 py-3 ${footerClassName}`}>
           {footer}
         </div>
       )}
@@ -42,4 +50,3 @@ export const Card = ({
 };
 
 export default Card;
-

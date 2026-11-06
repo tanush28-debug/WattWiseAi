@@ -25,8 +25,8 @@ export const Input = ({
   const effectiveType = isPassword ? (showPassword ? 'text' : 'password') : type;
 
   const surfaceStyles = surface === 'dark'
-    ? 'bg-midnight-850 border-midnight-700 text-ivory-100 placeholder:text-midnight-500 focus:border-cobalt-500 focus:ring-cobalt-500/20'
-    : 'bg-white border-ivory-300 text-midnight-900 placeholder:text-midnight-500/60 focus:border-cobalt-500 focus:ring-cobalt-500/10';
+    ? 'bg-slate-900 border-slate-700 text-slate-100 placeholder:text-slate-500 focus:border-cobalt-500 focus:ring-cobalt-500/20'
+    : 'bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-cobalt-500 focus:ring-cobalt-500/20';
 
   return (
     <div className={`flex flex-col gap-1.5 ${className}`}>
@@ -34,7 +34,7 @@ export const Input = ({
         <label
           htmlFor={inputId}
           className={`text-xs font-semibold tracking-wide ${
-            surface === 'dark' ? 'text-ivory-300' : 'text-midnight-800'
+            surface === 'dark' ? 'text-slate-300' : 'text-slate-700'
           }`}
         >
           {label} {required && <span className="text-cobalt-600 dark:text-cobalt-400">*</span>}
@@ -57,7 +57,7 @@ export const Input = ({
           placeholder={placeholder}
           disabled={disabled}
           required={required}
-          className={`w-full rounded-xl border px-3.5 py-2.5 text-sm transition-all duration-150 outline-none focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+          className={`w-full rounded-md border px-3.5 py-2.5 text-sm outline-none transition-colors focus:ring-2 disabled:cursor-not-allowed disabled:opacity-50 ${
             LeftIcon ? 'pl-10' : ''
           } ${isPassword || RightIcon ? 'pr-10' : ''} ${
             error ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-500/20' : ''
@@ -86,9 +86,7 @@ export const Input = ({
       {error ? (
         <p className="text-xs text-rose-500 font-medium">{error}</p>
       ) : helperText ? (
-        <p className={`text-xs ${surface === 'dark' ? 'text-midnight-500' : 'text-midnight-600'}`}>
-          {helperText}
-        </p>
+        <p className="text-xs text-slate-500">{helperText}</p>
       ) : null}
     </div>
   );

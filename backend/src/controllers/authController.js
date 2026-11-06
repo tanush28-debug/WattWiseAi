@@ -12,6 +12,7 @@ export const authController = {
         });
       }
 
+      res.set('Cache-Control', 'no-store');
       res.json({
         success: true,
         user: {

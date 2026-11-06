@@ -13,7 +13,7 @@ export const ResetPasswordPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const { resetPassword } = useAuth();
+  const { resetPassword, loading: authLoading, isAuthenticated, authError } = useAuth();
   const toast = useToast();
   const navigate = useNavigate();
 
@@ -41,6 +41,22 @@ export const ResetPasswordPage = () => {
       setIsLoading(false);
     }
   };
+
+  if (authLoading) {
+    return <p role="status" className="text-sm text-midnight-600">Checking recovery session...</p>;
+  }
+
+  if (!isAuthenticated && !isSuccess) {
+    return (
+      <div className="bg-white p-8 rounded-3xl border border-ivory-300 shadow-card">
+        <h2 className="text-xl font-bold text-midnight-900 mb-2">Recovery Link Required</h2>
+        <p role="alert" className="text-sm text-midnight-600 mb-4">
+          {authError || 'This recovery link is missing or expired. Request a new password reset link.'}
+        </p>
+        <Link to="/forgot-password" className="text-sm font-medium text-cobalt-600">Request a New Link</Link>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white p-8 rounded-3xl border border-ivory-300 shadow-card">

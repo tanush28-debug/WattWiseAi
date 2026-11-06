@@ -137,7 +137,6 @@ export const LandingPage = () => {
                 size="lg"
                 onClick={handleGetStarted}
                 rightIcon={ArrowRight}
-                className="shadow-cobalt-glow"
               >
                 Get Started
               </Button>
@@ -167,10 +166,7 @@ export const LandingPage = () => {
 
           {/* Interactive Energy Analytics Visual */}
           <div className="lg:col-span-5 relative">
-            {/* Soft decorative glow */}
-            <div className="absolute -inset-4 bg-cobalt-500/15 rounded-3xl blur-2xl pointer-events-none" />
-
-            <div className="relative bg-midnight-900 text-ivory-100 rounded-3xl p-6 sm:p-7 border border-midnight-700 shadow-2xl space-y-6">
+            <div className="relative bg-midnight-900 text-ivory-100 rounded-md p-6 sm:p-7 border border-midnight-700 space-y-6">
               {/* Product Card Header */}
               <div className="flex items-center justify-between border-b border-midnight-800 pb-4">
                 <div className="flex items-center gap-3">
@@ -191,7 +187,7 @@ export const LandingPage = () => {
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-midnight-850 p-3.5 rounded-2xl border border-midnight-800">
                   <p className="text-[10px] font-mono uppercase text-midnight-400">Est. Monthly Bill</p>
-                  <p className="text-xl font-bold text-ivory-100 mt-1 font-sans">₹4,280</p>
+                  <p className="text-xl font-bold text-ivory-100 mt-1 font-mono">₹4,280</p>
                   <span className="text-[10px] font-mono text-emerald-400 flex items-center gap-1 mt-1">
                     <TrendingDown className="w-3 h-3" /> -12.4% vs last cycle
                   </span>
@@ -369,7 +365,6 @@ export const LandingPage = () => {
               size="lg"
               onClick={handleGetStarted}
               rightIcon={ArrowRight}
-              className="shadow-cobalt-glow"
             >
               Launch WattWise AI Now
             </Button>

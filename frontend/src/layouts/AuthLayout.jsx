@@ -34,15 +34,13 @@ export const AuthLayout = () => {
             className="w-full h-full object-cover opacity-30 scale-105 transition-all duration-700"
             loading="lazy"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-midnight-950 via-midnight-950/85 to-midnight-900/75" />
-          {/* Subtle electric cobalt ambient glow */}
-          <div className="absolute top-1/4 -left-20 w-80 h-80 bg-cobalt-500/20 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute inset-0 bg-midnight-950/80" />
         </div>
 
         {/* Clickable WattWise AI Logo -> Home */}
         <div className="relative z-10">
           <Link to="/" className="inline-flex items-center gap-2.5 group cursor-pointer" title="Return to WattWise Homepage">
-            <div className="w-9 h-9 rounded-xl bg-cobalt-500 flex items-center justify-center text-white shadow-cobalt-sm group-hover:scale-105 transition-transform">
+            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-cobalt-600 text-white">
               <Zap className="w-5 h-5 fill-white stroke-white" />
             </div>
             <span className="text-xl font-black tracking-tight text-ivory-100 font-sans">
@@ -53,7 +51,7 @@ export const AuthLayout = () => {
 
         {/* Center Panel Hero Information */}
         <div className="relative z-10 max-w-md my-auto">
-          <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-cobalt-400 bg-midnight-900/90 px-3 py-1 rounded-full border border-cobalt-500/30 mb-6 backdrop-blur-sm">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-sm border border-cobalt-700 bg-midnight-900 px-3 py-1 font-mono text-xs uppercase tracking-wider text-cobalt-300">
             <Icon className="w-3.5 h-3.5" />
             <span>{currentAsset.title} Authorization</span>
           </div>

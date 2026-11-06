@@ -29,40 +29,42 @@ export const Modal = ({
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-midnight-950/60 backdrop-blur-sm"
+            className="fixed inset-0 bg-slate-950/60"
           />
 
-          {/* Dialog Container */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.96, y: 12 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.96, y: 12 }}
-            transition={{ duration: 0.2, ease: 'easeOut' }}
-            className={`relative w-full ${maxWidth} bg-white rounded-2xl shadow-2xl border border-ivory-300 overflow-hidden z-10`}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 8 }}
+            transition={{ duration: 0.15, ease: 'easeOut' }}
+            className={`relative z-10 w-full overflow-hidden rounded-md border border-slate-200 bg-white shadow-xl ${maxWidth}`}
           >
             {(title || showClose) && (
-              <div className="flex items-center justify-between px-6 py-5 border-b border-ivory-200 bg-ivory-50">
-                <div>
-                  {title && <h3 className="text-base font-bold text-midnight-900">{title}</h3>}
-                  {subtitle && <p className="text-xs text-midnight-600 mt-0.5">{subtitle}</p>}
+              <div className="flex items-center justify-between gap-4 border-b border-slate-200 bg-white px-5 py-3.5">
+                <div className="min-w-0">
+                  {title && (
+                    <h3 className="truncate text-sm font-semibold text-slate-900">{title}</h3>
+                  )}
+                  {subtitle && <p className="mt-0.5 text-xs text-slate-500">{subtitle}</p>}
                 </div>
                 {showClose && (
                   <button
+                    type="button"
                     onClick={onClose}
-                    className="p-1 rounded-lg text-midnight-500 hover:text-midnight-900 hover:bg-ivory-200/60 transition-colors"
+                    className="rounded-sm p-1 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900"
+                    aria-label="Close dialog"
                   >
-                    <X className="w-5 h-5" />
+                    <X className="h-4 w-4" />
                   </button>
                 )}
               </div>
             )}
-            <div className="p-6 max-h-[80vh] overflow-y-auto">{children}</div>
+            <div className="max-h-[80vh] overflow-y-auto p-5">{children}</div>
           </motion.div>
         </div>
       )}
@@ -71,4 +73,3 @@ export const Modal = ({
 };
 
 export default Modal;
-

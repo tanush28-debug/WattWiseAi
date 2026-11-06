@@ -19,11 +19,20 @@ if (fs.existsSync(envPath)) {
   dotenv.config({ path: envPath, override: true });
 }
 
+const parseOrigins = (value) =>
+  String(value || '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
+const frontendOrigin = process.env.FRONTEND_ORIGIN || 'http://localhost:3001';
+
 export const config = {
   port: parseInt(process.env.PORT || '5000', 10),
   nodeEnv: process.env.NODE_ENV || 'development',
   isProduction: process.env.NODE_ENV === 'production',
-  frontendOrigin: process.env.FRONTEND_ORIGIN || 'http://localhost:3001',
+  frontendOrigin,
+  frontendOrigins: parseOrigins(frontendOrigin),
   
   supabase: {
     url: process.env.SUPABASE_URL || 'https://vxvgrtyvnulgnpcaadry.supabase.co',
@@ -33,7 +42,17 @@ export const config = {
   
   gemini: {
     apiKey: process.env.GEMINI_API_KEY || null,
-    model: process.env.GEMINI_MODEL || 'gemini-1.5-flash',
+    model: process.env.GEMINI_MODEL || 'gemini-3.8-flash',
+    fallbackModels: (process.env.GEMINI_FALLBACK_MODELS || [
+      'gemini-flash-lite-latest',
+      'gemini-3.5-flash-lite',
+      'gemini-3.6-flash',
+      'gemini-flash-latest',
+    ].join(','))
+      .split(',')
+      .map((value) => value.trim())
+      .filter(Boolean),
+    timeoutMs: parseInt(process.env.GEMINI_TIMEOUT_MS || '90000', 10),
   }
 };
 

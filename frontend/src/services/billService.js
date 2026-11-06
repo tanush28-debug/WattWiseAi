@@ -5,14 +5,9 @@ export const billService = {
    * Fetch all real uploaded bills for the authenticated user from the backend
    */
   async getBills() {
-    try {
-      const response = await apiClient.get('/bills');
-      const bills = Array.isArray(response) ? response : (response.data || []);
-      return { data: bills, isDemo: false };
-    } catch (err) {
-      console.warn('Could not retrieve uploaded bills from backend:', err.message);
-      return { data: [], isDemo: false };
-    }
+    const response = await apiClient.get('/bills');
+    const bills = Array.isArray(response) ? response : (response.data || []);
+    return { data: bills, isDemo: false };
   },
 
   /**
@@ -39,6 +34,7 @@ export const billService = {
     return {
       success: response.success ?? true,
       data: response.data || response,
+      message: response.message,
       isDemo: false
     };
   },
@@ -49,8 +45,9 @@ export const billService = {
   async confirmBill(billId, confirmedData) {
     const response = await apiClient.patch(`/bills/${billId}/confirm`, confirmedData);
     return {
-      success: true,
+      success: response.success ?? true,
       data: response.data || response,
+      message: response.message,
       isDemo: false
     };
   },
